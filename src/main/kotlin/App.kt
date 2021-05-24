@@ -20,10 +20,10 @@ import styled.styledH6
 import styled.styledSpan
 
 suspend fun fetchSource(): MutableMap<LetterKey, String> {
-    val sourceUrl = "/private/tamilLetters.txt"
+    val sourceUrl = "/tamil-flash-cards/private/tamilLetters.txt"
     val sourceData = window.fetch(sourceUrl).await().text().await()
     val tamilLetters = readSource(sourceData)
-    println("version: 2021-05-23.1")
+    println("version: 2021-05-24.1")
     return tamilLetters
 }
 
