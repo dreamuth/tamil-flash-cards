@@ -32,14 +32,14 @@ class StatusPage : RComponent<StatusPageProps, RState>() {
                         }
                         styledH6 {
                             css {
-                                classes = mutableListOf("me-auto mb-0")
+                                classes = mutableListOf("me-auto mb-0 ps-3")
                             }
                             val time = props.questionState.timerState.time
                             +"${time / 60 % 60} : ${time % 60}"
                         }
                         styledH6 {
                             css {
-                                classes = mutableListOf("")
+                                classes = mutableListOf("pe-3")
                             }
                             +"Points: "
                             styledSpan {

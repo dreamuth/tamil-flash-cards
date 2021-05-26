@@ -79,57 +79,21 @@ class TamilLettersPage : RComponent<TamilLettersPageProps, RState>() {
                     }
                     attrs {
                         onClickFunction = {
-                            props.onShowAnswerClick()
+                            if (props.questionState.showAnswer) {
+                                props.onNextClick()
+                            } else {
+                                props.onShowAnswerClick()
+                            }
                         }
                     }
                     if (props.questionState.showAnswer) {
                         +props.questionState.letterState.getAnswer()
                     } else {
-                        +"Show"
+                        +""
                     }
                 }
             }
         }
-        styledDiv {
-            css {
-                classes = mutableListOf("row m-1")
-            }
-            styledDiv {
-                css {
-                    classes = mutableListOf("col p-1")
-                }
-                styledButton {
-                    css {
-                        classes = mutableListOf("btn btn-primary w-100")
-                        fontSize = 40.px
-                    }
-                    attrs {
-                        onClickFunction = {
-                            props.onPreviousClick()
-                        }
-                    }
-                    +"Previous"
-                }
-            }
-            styledDiv {
-                css {
-                    classes = mutableListOf("col p-1")
-                }
-                styledButton {
-                    css {
-                        classes = mutableListOf("btn btn-primary w-100")
-                        fontSize = 40.px
-                    }
-                    attrs {
-                        onClickFunction = {
-                            props.onNextClick()
-                        }
-                    }
-                    +"Next"
-                }
-            }
-        }
-
     }
 }
 

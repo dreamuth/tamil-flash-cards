@@ -3,8 +3,12 @@ import kotlin.random.Random
 data class LetterKey(val uyir: String, val mei: String)
 
 data class QuestionState(
+    var isTamil: Boolean,
     var tamilLetters: Map<LetterKey, String>,
-    var letterState: LetterState,
+    var sightWords: MutableMap<EnglishLevel, List<String>>,
+    var letterState: LetterStateTamil,
+    var sightWordsState: SightWordsState,
+    var selectedEnglishLevel: EnglishLevel,
     var timerState: TimerState,
     var showAnswer: Boolean
 )
@@ -15,13 +19,31 @@ data class TimerState(
     var time: Long = 0,
     var count: Int = 0)
 
-data class LetterState(
+enum class EnglishLevel(val displayValue: String, val filename: String) {
+    LEVEL_I("Level I", "level1"),
+    LEVEL_II("Level II", "level2"),
+    LEVEL_III("Level III", "level3"),
+    LEVEL_IV("Level IV", "level4"),
+    LEVEL_V("Level V", "level5"),
+    LEVEL_VI("Level VI", "level6");
+
+    companion object {
+        fun fromDisplayValue(displayValue: String): EnglishLevel {
+            return values().first { it.displayValue == displayValue }
+        }
+        fun fromFilename(filename: String): EnglishLevel {
+            return values().first { it.filename == filename }
+        }
+    }
+}
+
+data class LetterStateTamil(
     override var index: Int,
     override var tamilLetters: Map<LetterKey, String>,
     override var history: MutableList<Int>,
     override var answers: MutableSet<LetterKey>,
     val letterKeys: List<LetterKey>
-) : HistoryState {
+) : TamilHistoryState {
     constructor(tamilLetters: Map<LetterKey, String>) : this(
         nextIndex(0, tamilLetters.size),
         tamilLetters,
@@ -38,7 +60,7 @@ data class LetterState(
     fun getAnswer(): String = tamilLetters[getCurrent()]!!
 }
 
-interface HistoryState {
+interface TamilHistoryState {
     var index: Int
     var tamilLetters: Map<LetterKey, String>
     var history: MutableList<Int>
@@ -68,6 +90,59 @@ interface HistoryState {
     }
     fun clearAnswers() = answers.clear()
 }
+
+data class SightWordsState(
+    override var index: Int,
+    override var words: List<String>,
+    override var history: MutableList<Int>,
+    override var answers: MutableSet<String>
+) : HistoryState {
+    constructor(words: List<String>) : this(
+        nextIndex(0, words.size),
+        words,
+        mutableListOf(),
+        mutableSetOf())
+    fun getCurrent(): String = words[index]
+    fun goNext(): Int {
+        answers.add(getCurrent())
+        goNext(words.size)
+        return answers.size
+    }
+    fun goPrevious() = goPrevious(words.size)
+    fun getAnswer(): String = getCurrent()
+}
+
+interface HistoryState {
+    var index: Int
+    var words: List<String>
+    var history: MutableList<Int>
+    var answers: MutableSet<String>
+    fun goNext(maxIndex: Int) {
+        if (history.isEmpty()) {
+            history = generateRandomList(maxIndex)
+            history.remove(index)
+            history.add(index)
+        }
+        val nextIndex = history.removeFirst()
+        history.add(nextIndex)
+        println("${this::class} Current: $index to New: $nextIndex of Total: $maxIndex")
+        index = nextIndex
+    }
+    fun goPrevious(maxIndex: Int) {
+        if (history.isEmpty()) {
+            history = generateRandomList(maxIndex)
+            history.remove(index)
+            history.add(index)
+        }
+        var nextIndex = history.removeLast()
+        history.add(0, nextIndex)
+        nextIndex = history.last()
+        println("${this::class} Current: $index to New: $nextIndex of Total: $maxIndex")
+        index = nextIndex
+    }
+    fun clearAnswers() = answers.clear()
+}
+
 
 fun generateRandomList(maxIndex: Int): MutableList<Int> {
     var count = maxIndex - 1
