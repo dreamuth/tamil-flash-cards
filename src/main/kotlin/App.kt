@@ -39,12 +39,15 @@ external interface AppState : RState {
     var questionState: QuestionState
 }
 
+val mainScope = MainScope()
+
 class App : RComponent<RProps, AppState>() {
     override fun AppState.init() {
-        val mainScope = MainScope()
         mainScope.launch {
             val receivedLetters = fetchSource()
             val sightWordsSource = fetchSightWords()
+            val newSightWordsState = SightWordsState(sightWordsSource[EnglishLevel.LEVEL_I]!!)
+            val soundUrls = fetchSoundUrls(newSightWordsState.getCurrent())
             setState {
                 questionState = QuestionState(
                     isTamil = true,
@@ -54,7 +57,8 @@ class App : RComponent<RProps, AppState>() {
                     letterState = LetterStateTamil(receivedLetters),
                     timerState = TimerState(isLive = true),
                     showAnswer = false,
-                    sightWordsState = SightWordsState(sightWordsSource[EnglishLevel.LEVEL_I]!!)
+                    sightWordsState = newSightWordsState,
+                    sightWordsAudios = soundUrls
                 )
                 loaded = true
                 window.setInterval(timerHandler(), 1000)
@@ -70,6 +74,13 @@ class App : RComponent<RProps, AppState>() {
                 questionState.timerState.time++
             }
         }
+    }
+
+    private suspend fun fetchSoundUrls(word: String): List<String> {
+        val sourceUrl = "https://api.dictionaryapi.dev/api/v2/entries/en_US/$word"
+        val sourceData = window.fetch(sourceUrl).await().json().await() as Array<SoundResponse>
+        val values = sourceData.firstOrNull()?.phonetics?.map { it.audio }
+        return values?.filterNotNull() ?: listOf()
     }
 
     override fun RBuilder.render() {
@@ -161,10 +172,22 @@ class App : RComponent<RProps, AppState>() {
                                         questionState.timerState = TimerState(isLive = true)
                                     }
                                 }
+                                mainScope.launch {
+                                    val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
+                                    setState {
+                                        questionState.sightWordsAudios = fetchSoundUrls
+                                    }
+                                }
                             }
                             onNextClick = {
                                 setState {
                                     questionState.timerState.count = questionState.sightWordsState.goNext()
+                                }
+                                mainScope.launch {
+                                    val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
+                                    setState {
+                                        questionState.sightWordsAudios = fetchSoundUrls
+                                    }
                                 }
                             }
                         }

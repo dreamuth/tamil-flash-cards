@@ -1,5 +1,14 @@
 import kotlin.random.Random
 
+external interface SoundResponse {
+    val word: String
+    val phonetics: Array<Phonetic>
+    val meanings: Array<Any>
+}
+external interface Phonetic {
+    val text: String?
+    val audio: String?
+}
 data class LetterKey(val uyir: String, val mei: String)
 
 data class QuestionState(
@@ -9,6 +18,7 @@ data class QuestionState(
     var letterState: LetterStateTamil,
     var sightWordsState: SightWordsState,
     var selectedEnglishLevel: EnglishLevel,
+    var sightWordsAudios: List<String>,
     var timerState: TimerState,
     var showAnswer: Boolean
 )

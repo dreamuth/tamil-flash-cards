@@ -2,6 +2,7 @@ import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.px
 import kotlinx.html.js.onClickFunction
+import org.w3c.dom.Audio
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -64,6 +65,32 @@ class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
                         }
                     }
                     +props.questionState.sightWordsState.getCurrent()
+                }
+            }
+        }
+        styledDiv {
+            css {
+                classes = mutableListOf("d-flex bd-highlight")
+            }
+            if (props.questionState.sightWordsAudios.isNotEmpty()) {
+                props.questionState.sightWordsAudios.forEach { soundUrl ->
+                    styledDiv {
+                        css {
+                            classes = mutableListOf("p-2 flex-fill")
+                        }
+                        styledButton {
+                            css {
+                                classes = mutableListOf("btn btn-success w-100")
+                                fontSize = 20.px
+                            }
+                            attrs {
+                                onClickFunction = {
+                                    Audio(soundUrl).play()
+                                }
+                            }
+                            +"Audio"
+                        }
+                    }
                 }
             }
         }
