@@ -10,7 +10,7 @@ import styled.styledDiv
 import styled.styledH3
 
 external interface KeyValuePairProps : RProps {
-    var key: String
+    var label: String
     var value: String
 }
 
@@ -28,7 +28,7 @@ class KeyValuePair : RComponent<KeyValuePairProps, RState>() {
                     css {
                         classes = mutableListOf("card-text")
                     }
-                    +props.key
+                    +props.label
                 }
             }
             styledDiv {

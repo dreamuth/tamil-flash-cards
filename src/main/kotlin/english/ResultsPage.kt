@@ -15,6 +15,7 @@ import react.ReactElement
 import styled.css
 import styled.styledButton
 import styled.styledDiv
+import styled.styledH2
 
 external interface ResultsPageProps : RProps {
     var englishLevel: EnglishLevel
@@ -37,23 +38,34 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                 val displayValue = "${time / 60 % 60} : ${time % 60}"
                 styledDiv {
                     css {
-                        classes = mutableListOf("card bg-success text-white")
+                        classes = mutableListOf("card bg-primary text-white")
                         height = 250.px
+                    }
+                    styledDiv {
+                        css {
+                            classes = mutableListOf("card-header")
+                        }
+                        styledH2 {
+                            css {
+                                classes = mutableListOf("text-center")
+                            }
+                            +"congratulations!!!"
+                        }
                     }
                     styledDiv {
                         css {
                             classes = mutableListOf("card-body")
                         }
                         keyValuePair {
-                            key = "Level:"
+                            label = "Level:"
                             value = props.englishLevel.name.removePrefix("LEVEL_")
                         }
                         keyValuePair {
-                            key = "Total question:"
+                            label = "Total question:"
                             value = "${props.timerState.total}"
                         }
                         keyValuePair {
-                            key = "Duration:"
+                            label = "Duration:"
                             value = displayValue
                         }
                     }

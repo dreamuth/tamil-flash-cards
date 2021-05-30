@@ -26,7 +26,7 @@ suspend fun fetchSource(): MutableMap<LetterKey, String> {
     val sourceUrl = "$prefix/private/tamilLetters.txt"
     val sourceData = window.fetch(sourceUrl).await().text().await()
     val tamilLetters = readSource(sourceData)
-    println("version: 2021-05-30.2")
+    println("version: 2021-05-30.3")
     return tamilLetters
 }
 
@@ -200,9 +200,7 @@ class App : RComponent<RProps, AppState>() {
                             }
                             onNextClick = {
                                 setState {
-                                    for (i in 1..39) {
-                                        questionState.timerState.count = questionState.sightWordsState.goNext()
-                                    }
+                                    questionState.timerState.count = questionState.sightWordsState.goNext()
                                 }
                                 mainScope.launch {
                                     val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
