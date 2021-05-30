@@ -1,4 +1,6 @@
 import kotlinx.css.LinearDimension
+import kotlinx.css.fontSize
+import kotlinx.css.px
 import kotlinx.css.width
 import kotlinx.html.id
 import kotlinx.html.js.onClickFunction
@@ -28,6 +30,7 @@ class Dropdown : RComponent<DropdownProps, RState>() {
             css {
                 classes = mutableListOf("btn btn-primary dropdown-toggle")
                 props.width?.let { width = it }
+                fontSize = 20.px
             }
             attrs {
                 id = props.id
@@ -54,11 +57,11 @@ class Dropdown : RComponent<DropdownProps, RState>() {
                     styledButton {
                         css {
                             classes = mutableListOf("dropdown-item")
+                            fontSize = 20.px
                         }
                         +name
                         attrs {
                             onClickFunction = {
-                                println("On click...")
                                 props.onDropdownClick(nameIndex, name)
                             }
                         }

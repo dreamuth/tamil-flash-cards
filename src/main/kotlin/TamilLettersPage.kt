@@ -89,7 +89,7 @@ class TamilLettersPage : RComponent<TamilLettersPageProps, RState>() {
                     if (props.questionState.showAnswer) {
                         +props.questionState.letterState.getAnswer()
                     } else {
-                        +""
+                        +"?"
                     }
                 }
             }

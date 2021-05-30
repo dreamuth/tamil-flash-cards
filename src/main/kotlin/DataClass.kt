@@ -1,3 +1,4 @@
+import org.w3c.dom.Audio
 import kotlin.random.Random
 
 external interface SoundResponse {
@@ -18,7 +19,7 @@ data class QuestionState(
     var letterState: LetterStateTamil,
     var sightWordsState: SightWordsState,
     var selectedEnglishLevel: EnglishLevel,
-    var sightWordsAudios: List<String>,
+    var sightWordsAudios: Map<String, Audio>,
     var timerState: TimerState,
     var showAnswer: Boolean
 )

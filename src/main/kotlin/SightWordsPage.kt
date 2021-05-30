@@ -1,8 +1,8 @@
 import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.px
+import kotlinx.css.width
 import kotlinx.html.js.onClickFunction
-import org.w3c.dom.Audio
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -12,11 +12,14 @@ import react.setState
 import styled.css
 import styled.styledButton
 import styled.styledDiv
+import styled.styledImg
 
 external interface SightWordsPageProps : RProps {
     var questionState: QuestionState
     var onLevelChangeClick: (EnglishLevel) -> Unit
+    var onBackClick: () -> Unit
     var onNextClick: () -> Unit
+    var onAudioClick: (String) -> Unit
 }
 
 class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
@@ -70,25 +73,49 @@ class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
         }
         styledDiv {
             css {
-                classes = mutableListOf("d-flex bd-highlight")
+                classes = mutableListOf("row m-0")
             }
-            if (props.questionState.sightWordsAudios.isNotEmpty()) {
-                props.questionState.sightWordsAudios.forEach { soundUrl ->
-                    styledDiv {
+            styledDiv {
+                css {
+                    classes = mutableListOf("col p-1")
+                }
+                styledDiv {
+                    css {
+                        classes = mutableListOf("d-flex")
+                    }
+                    styledButton {
                         css {
-                            classes = mutableListOf("p-2 flex-fill")
+                            classes = mutableListOf("btn btn-success m-1 flex-fill")
+                            fontSize = 30.px
+                            height = 60.px
                         }
-                        styledButton {
-                            css {
-                                classes = mutableListOf("btn btn-success w-100")
-                                fontSize = 20.px
+                        attrs {
+                            onClickFunction = {
+                                props.onBackClick()
                             }
-                            attrs {
-                                onClickFunction = {
-                                    Audio(soundUrl).play()
+                        }
+                        +"Back"
+                    }
+                    if (props.questionState.sightWordsAudios.isNotEmpty()) {
+                        props.questionState.sightWordsAudios.forEach { soundInfo ->
+                            styledButton {
+                                css {
+                                    classes = mutableListOf("btn btn-success m-1 flex-fill")
+                                    fontSize = 20.px
+                                    height = 60.px
+                                }
+                                attrs {
+                                    onClickFunction = {
+                                        props.onAudioClick(soundInfo.key)
+                                    }
+                                }
+                                styledImg {
+                                    css {
+                                        width = 40.px
+                                    }
+                                    attrs.src = "svg/audio.svg"
                                 }
                             }
-                            +"Audio"
                         }
                     }
                 }

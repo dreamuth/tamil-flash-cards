@@ -2,9 +2,12 @@ import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
-import kotlinx.css.height
-import kotlinx.css.pct
+import kotlinx.css.Color
+import kotlinx.css.backgroundColor
+import kotlinx.css.fontSize
+import kotlinx.css.px
 import kotlinx.html.js.onClickFunction
+import org.w3c.dom.Audio
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -19,7 +22,7 @@ suspend fun fetchSource(): MutableMap<LetterKey, String> {
     val sourceUrl = "$prefix/private/tamilLetters.txt"
     val sourceData = window.fetch(sourceUrl).await().text().await()
     val tamilLetters = readSource(sourceData)
-    println("version: 2021-05-25.1")
+    println("version: 2021-05-30.1")
     return tamilLetters
 }
 
@@ -50,7 +53,7 @@ class App : RComponent<RProps, AppState>() {
             val soundUrls = fetchSoundUrls(newSightWordsState.getCurrent())
             setState {
                 questionState = QuestionState(
-                    isTamil = true,
+                    isTamil = false,
                     tamilLetters = receivedLetters,
                     sightWords = sightWordsSource,
                     selectedEnglishLevel = EnglishLevel.LEVEL_I,
@@ -58,7 +61,7 @@ class App : RComponent<RProps, AppState>() {
                     timerState = TimerState(isLive = true),
                     showAnswer = false,
                     sightWordsState = newSightWordsState,
-                    sightWordsAudios = soundUrls
+                    sightWordsAudios = soundUrls.associateWith { Audio(it) }
                 )
                 loaded = true
                 window.setInterval(timerHandler(), 1000)
@@ -86,20 +89,15 @@ class App : RComponent<RProps, AppState>() {
     override fun RBuilder.render() {
         styledDiv {
             css {
-                classes = mutableListOf("container-fluid m-0 p-0")
-                height = 100.pct
+                classes = mutableListOf("container-sm p-0 h-100")
+                backgroundColor = Color("#F0F2F5").withAlpha(0.5)
+            }
+            headerPage {
+                title = if (state.loaded && !state.questionState.isTamil) "English Practice" else "தமிழ் பயிற்சி"
             }
             styledDiv {
                 css {
-                    classes = mutableListOf("alert alert-primary text-center mb-0 rounded-0 fw-bold")
-                }
-                val displayValue =
-                    if (state.loaded && !state.questionState.isTamil) "English Practice" else "தமிழ் பயிற்சி"
-                +displayValue
-            }
-            styledDiv {
-                css {
-                    classes = mutableListOf("container-fluid m-0 p-0")
+                    classes = mutableListOf("container-fluid m-0 p-0 justify-content-center")
                 }
                 if (state.loaded) {
                     styledDiv {
@@ -111,6 +109,7 @@ class App : RComponent<RProps, AppState>() {
                         styledButton {
                             css {
                                 classes = mutableListOf("btn btn-outline-primary $tamilStyle")
+                                fontSize = 20.px
                             }
                             attrs {
                                 onClickFunction = {
@@ -126,6 +125,7 @@ class App : RComponent<RProps, AppState>() {
                         styledButton {
                             css {
                                 classes = mutableListOf("btn btn-outline-primary $englishStyle")
+                                fontSize = 20.px
                             }
                             attrs {
                                 onClickFunction = {
@@ -175,7 +175,18 @@ class App : RComponent<RProps, AppState>() {
                                 mainScope.launch {
                                     val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
                                     setState {
-                                        questionState.sightWordsAudios = fetchSoundUrls
+                                        questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
+                                    }
+                                }
+                            }
+                            onBackClick = {
+                                setState {
+                                    questionState.sightWordsState.goPrevious()
+                                }
+                                mainScope.launch {
+                                    val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
+                                    setState {
+                                        questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
                                     }
                                 }
                             }
@@ -186,14 +197,41 @@ class App : RComponent<RProps, AppState>() {
                                 mainScope.launch {
                                     val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
                                     setState {
-                                        questionState.sightWordsAudios = fetchSoundUrls
+                                        questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
+                                    }
+                                }
+                            }
+                            onAudioClick = { name ->
+                                state.questionState.sightWordsAudios.forEach {
+                                    if (it.key != name) {
+                                        it.value.pause()
+                                        it.value.currentTime = 0.0
+                                    }
+                                }
+                                val audio = state.questionState.sightWordsAudios[name]
+                                audio?.let {
+                                    if (it.currentTime.equals(0.0) || it.ended) {
+                                        it.play()
                                     }
                                 }
                             }
                         }
                     }
+                }
+            }
+            styledDiv {
+                css {
+                    classes = mutableListOf("fixed-bottom w-100")
+                }
+                styledDiv {
+                    css {
+                        classes = mutableListOf("container-sm p-0")
+                    }
+                    val time = if (state.loaded) state.questionState.timerState.time else 0
+                    val points = if (state.loaded) state.questionState.timerState.count else 0
                     statusPage {
-                        questionState = state.questionState
+                        left = "Time: ${time / 60 % 60} : ${time % 60}"
+                        right = "Points: $points"
                     }
                 }
             }
