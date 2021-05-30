@@ -26,7 +26,7 @@ suspend fun fetchSource(): MutableMap<LetterKey, String> {
     val sourceUrl = "$prefix/private/tamilLetters.txt"
     val sourceData = window.fetch(sourceUrl).await().text().await()
     val tamilLetters = readSource(sourceData)
-    println("version: 2021-05-30.3")
+    println("version: 2021-05-30.4")
     return tamilLetters
 }
 
@@ -57,9 +57,10 @@ class App : RComponent<RProps, AppState>() {
             val soundUrls = fetchSoundUrls(newSightWordsState.getCurrent())
             setState {
                 questionState = QuestionState(
-                    isTamil = false,
+                    isTamil = true,
                     tamilLetters = receivedLetters,
                     sightWords = sightWordsSource,
+                    selectedTamilLevel = TamilLevel.LEVEL_I,
                     selectedEnglishLevel = EnglishLevel.LEVEL_I,
                     letterState = LetterStateTamil(receivedLetters),
                     showAnswer = false,
@@ -166,24 +167,34 @@ class App : RComponent<RProps, AppState>() {
                                     questionState.letterState.goPrevious()
                                 }
                             }
+                            onLevelChangeClick = { tamilLevel ->
+                                if (questionState.selectedTamilLevel != tamilLevel) {
+                                    setState {
+                                        questionState.selectedTamilLevel = tamilLevel
+                                        questionState.letterState = LetterStateTamil(state.questionState.tamilLetters)
+                                        questionState.timerState =
+                                            TimerState(isLive = true, total = questionState.letterState.letterKeys.size)
+                                    }
+                                }
+                            }
                         }
                     } else {
                         sightWordsPage {
                             questionState = state.questionState
                             onLevelChangeClick = { englishLevel ->
-                                setState {
-                                    if (questionState.selectedEnglishLevel != englishLevel) {
+                                if (questionState.selectedEnglishLevel != englishLevel) {
+                                    setState {
                                         questionState.selectedEnglishLevel = englishLevel
                                         questionState.sightWordsState =
                                             SightWordsState(questionState.sightWords[englishLevel]!!)
                                         questionState.timerState =
                                             TimerState(isLive = true, total = questionState.sightWordsState.words.size)
                                     }
-                                }
-                                mainScope.launch {
-                                    val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
-                                    setState {
-                                        questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
+                                    mainScope.launch {
+                                        val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
+                                        setState {
+                                            questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
+                                        }
                                     }
                                 }
                             }

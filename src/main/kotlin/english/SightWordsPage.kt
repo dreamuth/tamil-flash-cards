@@ -20,7 +20,7 @@ external interface SightWordsPageProps : RProps {
 
 class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
     override fun RBuilder.render() {
-        levelDropDown {
+        englishLevelDropDown {
             displayValue = props.questionState.selectedEnglishLevel.displayValue
             onLevelChangeClick = props.onLevelChangeClick
         }

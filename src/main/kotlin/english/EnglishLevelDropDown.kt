@@ -11,12 +11,12 @@ import react.setState
 import styled.css
 import styled.styledDiv
 
-external interface LevelDropDownProps : RProps {
+external interface EnglishLevelDropDownProps : RProps {
     var displayValue: String
     var onLevelChangeClick: (EnglishLevel) -> Unit
 }
 
-class LevelDropDown : RComponent<LevelDropDownProps, RState>() {
+class EnglishLevelDropDown : RComponent<EnglishLevelDropDownProps, RState>() {
     override fun RBuilder.render() {
         styledDiv {
             css {
@@ -37,7 +37,6 @@ class LevelDropDown : RComponent<LevelDropDownProps, RState>() {
                 selectedName = props.displayValue
                 onDropdownClick = { _, name ->
                     setState {
-                        println(name)
                         props.onLevelChangeClick(EnglishLevel.fromDisplayValue(name))
                     }
                 }
@@ -46,8 +45,8 @@ class LevelDropDown : RComponent<LevelDropDownProps, RState>() {
     }
 }
 
-fun RBuilder.levelDropDown(handler: LevelDropDownProps.() -> Unit): ReactElement {
-    return child(LevelDropDown::class) {
+fun RBuilder.englishLevelDropDown(handler: EnglishLevelDropDownProps.() -> Unit): ReactElement {
+    return child(EnglishLevelDropDown::class) {
         this.attrs(handler)
     }
 }

@@ -18,6 +18,7 @@ data class QuestionState(
     var sightWords: MutableMap<EnglishLevel, List<String>>,
     var letterState: LetterStateTamil,
     var sightWordsState: SightWordsState,
+    var selectedTamilLevel: TamilLevel,
     var selectedEnglishLevel: EnglishLevel,
     var sightWordsAudios: Map<String, Audio>,
     var timerState: TimerState,
@@ -32,6 +33,17 @@ data class TimerState(
     var count: Int = 0) {
     fun isCompleted():Boolean {
         return count == total
+    }
+}
+
+enum class TamilLevel(val displayValue: String) {
+    LEVEL_I("நிலை I"),
+    LEVEL_II("நிலை II");
+
+    companion object {
+        fun fromDisplayValue(displayValue: String): TamilLevel {
+            return values().first { it.displayValue == displayValue }
+        }
     }
 }
 
