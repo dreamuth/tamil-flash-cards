@@ -1,3 +1,6 @@
+package tamil
+
+import QuestionState
 import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.pct

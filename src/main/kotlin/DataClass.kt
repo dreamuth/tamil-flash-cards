@@ -28,7 +28,12 @@ data class TimerState(
     var isLive: Boolean = false,
     var isPaused: Boolean = false,
     var time: Long = 0,
-    var count: Int = 0)
+    var total: Int = 0,
+    var count: Int = 0) {
+    fun isCompleted():Boolean {
+        return count == total
+    }
+}
 
 enum class EnglishLevel(val displayValue: String, val filename: String) {
     LEVEL_I("Level I", "level1"),

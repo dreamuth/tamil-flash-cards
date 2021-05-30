@@ -8,8 +8,7 @@ import styled.styledDiv
 import styled.styledH6
 
 external interface StatusPageProps : RProps {
-    var left: String
-    var right: String
+    var timerState: TimerState
 }
 
 class StatusPage : RComponent<StatusPageProps, RState>() {
@@ -30,19 +29,24 @@ class StatusPage : RComponent<StatusPageProps, RState>() {
                         css {
                             classes = mutableListOf("col")
                         }
+                        val time = props.timerState.time
+                        val displayValue = "Time: ${time / 60 % 60} : ${time % 60}"
                         styledH6 {
-                            +props.left
+                            +displayValue
                         }
                     }
                     styledDiv {
                         css {
                             classes = mutableListOf("col")
                         }
+                        val count = props.timerState.count
+                        val total = props.timerState.total
+                        val displayValue = "Points: $count/$total"
                         styledH6 {
                             css {
                                 classes = mutableListOf("text-end")
                             }
-                            +props.right
+                            +displayValue
                         }
                     }
                 }

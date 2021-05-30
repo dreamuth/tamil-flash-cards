@@ -1,3 +1,6 @@
+package english
+
+import QuestionState
 import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.px
@@ -8,69 +11,19 @@ import react.RComponent
 import react.RProps
 import react.RState
 import react.ReactElement
-import react.setState
 import styled.css
 import styled.styledButton
 import styled.styledDiv
 import styled.styledImg
 
-external interface SightWordsPageProps : RProps {
+external interface NavAndAudioProps : RProps {
     var questionState: QuestionState
-    var onLevelChangeClick: (EnglishLevel) -> Unit
     var onBackClick: () -> Unit
-    var onNextClick: () -> Unit
     var onAudioClick: (String) -> Unit
 }
 
-class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
+class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
     override fun RBuilder.render() {
-        styledDiv {
-            css {
-                classes = mutableListOf("btn-group p-2 w-100")
-            }
-            dropdown {
-                id = "EnglishSightWordsLevel"
-                names = listOf(
-                    listOf(
-                        EnglishLevel.LEVEL_I.displayValue,
-                        EnglishLevel.LEVEL_II.displayValue,
-                        EnglishLevel.LEVEL_III.displayValue,
-                        EnglishLevel.LEVEL_IV.displayValue,
-                        EnglishLevel.LEVEL_V.displayValue,
-                        EnglishLevel.LEVEL_VI.displayValue,
-                    )
-                )
-                selectedName = props.questionState.selectedEnglishLevel.displayValue
-                onDropdownClick = { _, name ->
-                    setState {
-                        props.onLevelChangeClick(EnglishLevel.fromDisplayValue(name))
-                    }
-                }
-            }
-        }
-        styledDiv {
-            css {
-                classes = mutableListOf("row m-1")
-            }
-            styledDiv {
-                css {
-                    classes = mutableListOf("col p-1")
-                }
-                styledButton {
-                    css {
-                        classes = mutableListOf("btn btn-success w-100")
-                        fontSize = 80.px
-                        height = 250.px
-                    }
-                    attrs {
-                        onClickFunction = {
-                            props.onNextClick()
-                        }
-                    }
-                    +props.questionState.sightWordsState.getCurrent()
-                }
-            }
-        }
         styledDiv {
             css {
                 classes = mutableListOf("row m-0")
@@ -90,6 +43,7 @@ class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
                             height = 60.px
                         }
                         attrs {
+                            disabled = props.questionState.timerState.count == 0
                             onClickFunction = {
                                 props.onBackClick()
                             }
@@ -124,8 +78,8 @@ class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
     }
 }
 
-fun RBuilder.sightWordsPage(handler: SightWordsPageProps.() -> Unit): ReactElement {
-    return child(SightWordsPage::class) {
+fun RBuilder.navAndAudio(handler: NavAndAudioProps.() -> Unit): ReactElement {
+    return child(NavAndAudio::class) {
         this.attrs(handler)
     }
 }
