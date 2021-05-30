@@ -1,3 +1,6 @@
+package pages
+
+import TimerState
 import react.RBuilder
 import react.RComponent
 import react.RProps

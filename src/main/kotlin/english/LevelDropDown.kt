@@ -1,7 +1,7 @@
 package english
 
 import EnglishLevel
-import dropdown
+import components.dropdown
 import react.RBuilder
 import react.RComponent
 import react.RProps

@@ -1,3 +1,5 @@
+package pages
+
 import react.RBuilder
 import react.RComponent
 import react.RProps

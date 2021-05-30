@@ -9,6 +9,8 @@ import kotlinx.css.fontSize
 import kotlinx.css.px
 import kotlinx.html.js.onClickFunction
 import org.w3c.dom.Audio
+import pages.headerPage
+import pages.statusPage
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -24,7 +26,7 @@ suspend fun fetchSource(): MutableMap<LetterKey, String> {
     val sourceUrl = "$prefix/private/tamilLetters.txt"
     val sourceData = window.fetch(sourceUrl).await().text().await()
     val tamilLetters = readSource(sourceData)
-    println("version: 2021-05-30.1")
+    println("version: 2021-05-30.2")
     return tamilLetters
 }
 

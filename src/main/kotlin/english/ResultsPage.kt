@@ -2,6 +2,7 @@ package english
 
 import EnglishLevel
 import TimerState
+import components.keyValuePair
 import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.px
@@ -14,7 +15,6 @@ import react.ReactElement
 import styled.css
 import styled.styledButton
 import styled.styledDiv
-import styled.styledH3
 
 external interface ResultsPageProps : RProps {
     var englishLevel: EnglishLevel
@@ -44,86 +44,17 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                         css {
                             classes = mutableListOf("card-body")
                         }
-                        styledDiv {
-                            css {
-                                classes = mutableListOf("row m-1")
-                            }
-                            styledDiv {
-                                css {
-                                    classes = mutableListOf("col p-1")
-                                }
-                                styledH3 {
-                                    css {
-                                        classes = mutableListOf("card-text")
-                                    }
-                                    +"Level:"
-                                }
-                            }
-                            styledDiv {
-                                css {
-                                    classes = mutableListOf("col p-1")
-                                }
-                                styledH3 {
-                                    css {
-                                        classes = mutableListOf("card-text")
-                                    }
-                                    +props.englishLevel.name.removePrefix("LEVEL_")
-                                }
-                            }
+                        keyValuePair {
+                            key = "Level:"
+                            value = props.englishLevel.name.removePrefix("LEVEL_")
                         }
-                        styledDiv {
-                            css {
-                                classes = mutableListOf("row m-1")
-                            }
-                            styledDiv {
-                                css {
-                                    classes = mutableListOf("col p-1")
-                                }
-                                styledH3 {
-                                    css {
-                                        classes = mutableListOf("card-text")
-                                    }
-                                    +"Total question:"
-                                }
-                            }
-                            styledDiv {
-                                css {
-                                    classes = mutableListOf("col p-1")
-                                }
-                                styledH3 {
-                                    css {
-                                        classes = mutableListOf("card-text")
-                                    }
-                                    +"${props.timerState.total}"
-                                }
-                            }
+                        keyValuePair {
+                            key = "Total question:"
+                            value = "${props.timerState.total}"
                         }
-                        styledDiv {
-                            css {
-                                classes = mutableListOf("row m-1")
-                            }
-                            styledDiv {
-                                css {
-                                    classes = mutableListOf("col p-1")
-                                }
-                                styledH3 {
-                                    css {
-                                        classes = mutableListOf("card-text")
-                                    }
-                                    +"Duration:"
-                                }
-                            }
-                            styledDiv {
-                                css {
-                                    classes = mutableListOf("col p-1")
-                                }
-                                styledH3 {
-                                    css {
-                                        classes = mutableListOf("card-text")
-                                    }
-                                    +displayValue
-                                }
-                            }
+                        keyValuePair {
+                            key = "Duration:"
+                            value = displayValue
                         }
                     }
                 }

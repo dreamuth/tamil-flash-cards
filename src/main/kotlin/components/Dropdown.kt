@@ -1,3 +1,5 @@
+package components
+
 import kotlinx.css.LinearDimension
 import kotlinx.css.fontSize
 import kotlinx.css.px
