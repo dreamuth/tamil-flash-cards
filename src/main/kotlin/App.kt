@@ -55,6 +55,7 @@ class App : RComponent<RProps, AppState>() {
             val sightWordsSource = fetchSightWords()
             val newSightWordsState = SightWordsState(sightWordsSource[EnglishLevel.LEVEL_I]!!)
             val soundUrls = fetchSoundUrls(newSightWordsState.getCurrent())
+            val newLetterState = LetterStateTamil(receivedLetters)
             setState {
                 questionState = QuestionState(
                     isTamil = true,
@@ -62,10 +63,10 @@ class App : RComponent<RProps, AppState>() {
                     sightWords = sightWordsSource,
                     selectedTamilLevel = TamilLevel.LEVEL_I,
                     selectedEnglishLevel = EnglishLevel.LEVEL_I,
-                    letterState = LetterStateTamil(receivedLetters),
+                    letterState = newLetterState,
                     showAnswer = false,
                     sightWordsState = newSightWordsState,
-                    timerState = TimerState(isLive = true, total = newSightWordsState.words.size),
+                    timerState = TimerState(isLive = true, total = newLetterState.letterKeys.size),
                     sightWordsAudios = soundUrls.associateWith { Audio(it) }
                 )
                 loaded = true
@@ -150,9 +151,10 @@ class App : RComponent<RProps, AppState>() {
                     if (state.questionState.isTamil) {
                         tamilLettersPage {
                             questionState = state.questionState
-                            onShowAnswerClick = {
+                            onShowAnswerClick = { points ->
                                 setState {
                                     questionState.showAnswer = !questionState.showAnswer
+                                    questionState.timerState.points += points
                                 }
                             }
                             onNextClick = {
@@ -273,7 +275,9 @@ class App : RComponent<RProps, AppState>() {
                     }
                     val currentTimerState =
                         if (state.loaded) state.questionState.timerState else TimerState(isLive = false)
+                    val selectedLang = if (state.loaded) state.questionState.isTamil else true
                     statusPage {
+                        isTamil = selectedLang
                         timerState = currentTimerState
                     }
                 }

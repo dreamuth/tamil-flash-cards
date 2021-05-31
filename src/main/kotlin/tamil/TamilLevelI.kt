@@ -12,21 +12,39 @@ import react.RComponent
 import react.RProps
 import react.RState
 import react.ReactElement
+import react.setState
 import styled.css
 import styled.styledButton
 import styled.styledDiv
+import styled.styledImg
 
-external interface TamilLevelIProps: RProps {
+external interface TamilLevelIProps : RProps {
     var questionState: QuestionState
-    var onShowAnswerClick: () -> Unit
+    var onShowAnswerClick: (Int) -> Unit
     var onNextClick: () -> Unit
 }
 
-class TamilLevelI : RComponent<TamilLevelIProps, RState>() {
+external interface TamilLevelIState : RState {
+    var checkState: MutableMap<String, Boolean>
+    var showHelp: Boolean
+}
+
+class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilLevelIState>(props) {
+    override fun TamilLevelIState.init(props: TamilLevelIProps) {
+        val mei = props.questionState.letterState.getCurrent().mei
+        val uyirMeiLetters = props.questionState.letterState.meiLettersMap[mei]!!
+        checkState = uyirMeiLetters.associateWith { true }.toMutableMap()
+        showHelp = false
+    }
+
     override fun RBuilder.render() {
+        val letterState = props.questionState.letterState
+        val current = letterState.getCurrent()
+        val showAnswer = props.questionState.showAnswer
+
         styledDiv {
             css {
-                classes = mutableListOf("row m-1")
+                classes = mutableListOf("row m-1 ")
             }
             styledDiv {
                 css {
@@ -42,7 +60,7 @@ class TamilLevelI : RComponent<TamilLevelIProps, RState>() {
                             classes = mutableListOf("card-body")
                             fontSize = 40.px
                         }
-                        +props.questionState.letterState.getCurrent().mei
+                        +current.mei
                     }
                 }
             }
@@ -60,8 +78,79 @@ class TamilLevelI : RComponent<TamilLevelIProps, RState>() {
                             classes = mutableListOf("card-body")
                             fontSize = 40.px
                         }
-                        +props.questionState.letterState.getCurrent().uyir
+                        if (state.showHelp) {
+                            +letterState.help[current.uyir]!!
+                        } else {
+                            styledImg {
+                                css {
+                                    width = 50.px
+                                }
+                                attrs.src = "svg/lightbulb.svg"
+                            }
+                        }
+                        attrs {
+                            onClickFunction = {
+                                setState {
+                                    showHelp = !showHelp
+                                }
+                            }
+                        }
                     }
+                }
+            }
+            styledDiv {
+                css {
+                    classes = mutableListOf("col p-1")
+                }
+                styledDiv {
+                    css {
+                        classes = mutableListOf("card bg-warning text-center")
+                        width = 100.pct
+                    }
+                    styledDiv {
+                        css {
+                            classes = mutableListOf("card-body")
+                            fontSize = 40.px
+                        }
+                        +current.uyir
+                    }
+                }
+            }
+        }
+        styledDiv {
+            css {
+                classes = mutableListOf("d-flex flex-wrap")
+            }
+            for (entry in state.checkState.entries) {
+                styledButton {
+                    val style = when {
+                        showAnswer && entry.key == letterState.getAnswer() -> "success"
+                        entry.value -> "primary"
+                        else -> "danger"
+                    }
+                    css {
+                        classes = mutableListOf("btn btn-$style m-2")
+                    }
+                    attrs {
+                        disabled = if (showAnswer) true else !entry.value
+                        onClickFunction = {
+                            if (letterState.getAnswer() == entry.key) {
+                                val failedCount = state.checkState.values.filter { !it }.count()
+                                val points = when {
+                                    failedCount >= 3 -> 0
+                                    state.showHelp && failedCount >= 1 -> 0
+                                    state.showHelp -> 1 - failedCount
+                                    else -> 3 - failedCount
+                                }
+                                props.onShowAnswerClick(points)
+                            } else {
+                                setState {
+                                    checkState[entry.key] = false
+                                }
+                            }
+                        }
+                    }
+                    +entry.key
                 }
             }
         }
@@ -77,21 +166,16 @@ class TamilLevelI : RComponent<TamilLevelIProps, RState>() {
                     css {
                         classes = mutableListOf("btn btn-success w-100")
                         fontSize = 80.px
-                        height = 250.px
+                        height = 150.px
                     }
                     attrs {
+                        disabled = !showAnswer
                         onClickFunction = {
-                            if (props.questionState.showAnswer) {
+                            if (showAnswer) {
                                 props.onNextClick()
-                            } else {
-                                props.onShowAnswerClick()
                             }
                         }
-                    }
-                    if (props.questionState.showAnswer) {
-                        +props.questionState.letterState.getAnswer()
-                    } else {
-                        +"?"
+                        if (showAnswer) +letterState.getAnswer() else +"?"
                     }
                 }
             }

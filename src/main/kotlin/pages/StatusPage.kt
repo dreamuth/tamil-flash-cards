@@ -11,6 +11,7 @@ import styled.styledDiv
 import styled.styledH6
 
 external interface StatusPageProps : RProps {
+    var isTamil: Boolean
     var timerState: TimerState
 }
 
@@ -42,9 +43,9 @@ class StatusPage : RComponent<StatusPageProps, RState>() {
                         css {
                             classes = mutableListOf("col")
                         }
-                        val count = props.timerState.count
-                        val total = props.timerState.total
-                        val displayValue = "Points: $count/$total"
+                        val points = if (props.isTamil) props.timerState.points else props.timerState.count
+                        val total = if (props.isTamil) props.timerState.totalPoints() else props.timerState.total
+                        val displayValue = "Points: $points/$total"
                         styledH6 {
                             css {
                                 classes = mutableListOf("text-end")

@@ -22,7 +22,7 @@ data class QuestionState(
     var selectedEnglishLevel: EnglishLevel,
     var sightWordsAudios: Map<String, Audio>,
     var timerState: TimerState,
-    var showAnswer: Boolean
+    var showAnswer: Boolean,
 )
 
 data class TimerState(
@@ -30,9 +30,13 @@ data class TimerState(
     var isPaused: Boolean = false,
     var time: Long = 0,
     var total: Int = 0,
+    var points: Int = 0,
     var count: Int = 0) {
     fun isCompleted():Boolean {
         return count == total
+    }
+    fun totalPoints(): Int {
+        return count * 3
     }
 }
 
@@ -65,19 +69,27 @@ enum class EnglishLevel(val displayValue: String, val filename: String) {
     }
 }
 
+val helpLetters = listOf("்","ா","ி","ீ","ு","ூ","ெ","ே","ை","ொ","ோ","ௌ")
+val uyirLetters = listOf("அ","ஆ","இ","ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ")
+val helpLettersMap = uyirLetters.zip(helpLetters).toMap()
+
 data class LetterStateTamil(
     override var index: Int,
     override var tamilLetters: Map<LetterKey, String>,
     override var history: MutableList<Int>,
     override var answers: MutableSet<LetterKey>,
-    val letterKeys: List<LetterKey>
+    val letterKeys: List<LetterKey>,
+    val meiLettersMap: Map<String, List<String>>,
+    val help: Map<String, String>
 ) : TamilHistoryState {
     constructor(tamilLetters: Map<LetterKey, String>) : this(
         nextIndex(0, tamilLetters.size),
         tamilLetters,
         mutableListOf(),
         mutableSetOf(),
-        tamilLetters.keys.toList())
+        tamilLetters.keys.toList(),
+        getMeiLettersMap(tamilLetters),
+        helpLettersMap )
     fun getCurrent(): LetterKey = letterKeys[index]
     fun goNext(): Int {
         answers.add(getCurrent())
@@ -186,4 +198,14 @@ fun nextIndex(currentIndex: Int, maxIndex: Int): Int {
     } while (newIndex == currentIndex && maxIndex != 1)
     println("Current: $currentIndex to New: $newIndex of Total: $maxIndex")
     return newIndex
+}
+
+fun getMeiLettersMap(tamilLetters: Map<LetterKey, String>): Map<String, List<String>> {
+    val meiLetters = tamilLetters.keys.map { it.mei }.toSet()
+    val result = mutableMapOf<String, List<String>>()
+    for (meiLetter in meiLetters) {
+        val meiLetterKeys = tamilLetters.keys.filter { it.mei == meiLetter }
+        result[meiLetterKeys[0].mei] = tamilLetters.filter { meiLetterKeys.contains(it.key) }.map { it.value }.toList()
+    }
+    return result
 }
