@@ -21,16 +21,8 @@ import styled.styledButton
 import styled.styledDiv
 import tamil.tamilLettersPage
 
-suspend fun fetchSource(): MutableMap<LetterKey, String> {
-    val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
-    val sourceUrl = "$prefix/private/tamilLetters.txt"
-    val sourceData = window.fetch(sourceUrl).await().text().await()
-    val tamilLetters = readSource(sourceData)
-    println("version: 2021-05-30.4")
-    return tamilLetters
-}
-
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
+    println("version: 2021-05-31.1")
     val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
     val result = mutableMapOf<EnglishLevel, List<String>>()
     for (i in 1..6) {
@@ -51,23 +43,20 @@ val mainScope = MainScope()
 class App : RComponent<RProps, AppState>() {
     override fun AppState.init() {
         mainScope.launch {
-            val receivedLetters = fetchSource()
             val sightWordsSource = fetchSightWords()
-            val newSightWordsState = SightWordsState(sightWordsSource[EnglishLevel.LEVEL_I]!!)
-            val soundUrls = fetchSoundUrls(newSightWordsState.getCurrent())
-            val newLetterState = LetterStateTamil(receivedLetters)
+            val newEnglishState = EnglishState(sightWordsSource[EnglishLevel.LEVEL_I]!!)
+            val soundUrls = fetchSoundUrls(newEnglishState.getQuestion())
             setState {
                 questionState = QuestionState(
-                    isTamil = true,
-                    tamilLetters = receivedLetters,
+                    cardType = CardType.TAMIL,
                     sightWords = sightWordsSource,
                     selectedTamilLevel = TamilLevel.LEVEL_I,
                     selectedEnglishLevel = EnglishLevel.LEVEL_I,
-                    letterState = newLetterState,
                     showAnswer = false,
-                    sightWordsState = newSightWordsState,
-                    timerState = TimerState(isLive = true, total = newLetterState.letterKeys.size),
-                    sightWordsAudios = soundUrls.associateWith { Audio(it) }
+                    englishState = newEnglishState,
+                    timerState = TimerState(),
+                    sightWordsAudios = soundUrls.associateWith { Audio(it) },
+                    tamilState = TamilState()
                 )
                 loaded = true
                 window.setInterval(timerHandler(), 1000)
@@ -78,7 +67,8 @@ class App : RComponent<RProps, AppState>() {
     private fun timerHandler(): () -> Unit = {
         if (state.questionState.timerState.isLive
             && !state.questionState.timerState.isPaused
-            && !state.questionState.timerState.isCompleted()
+            && ((state.questionState.cardType == CardType.TAMIL && !state.questionState.tamilState.isCompleted())
+                || (state.questionState.cardType == CardType.ENGLISH && !state.questionState.englishState.isCompleted()))
         ) {
             setState {
                 questionState.timerState.time++
@@ -100,7 +90,7 @@ class App : RComponent<RProps, AppState>() {
                 backgroundColor = Color("#F0F2F5").withAlpha(0.5)
             }
             headerPage {
-                title = if (state.loaded && !state.questionState.isTamil) "English Practice" else "தமிழ் பயிற்சி"
+                title = if (state.loaded) state.questionState.cardType.displayValue else CardType.TAMIL.displayValue
             }
             styledDiv {
                 css {
@@ -111,8 +101,8 @@ class App : RComponent<RProps, AppState>() {
                         css {
                             classes = mutableListOf("btn-group p-2 w-100")
                         }
-                        val tamilStyle = if (state.questionState.isTamil) "active" else ""
-                        val englishStyle = if (state.questionState.isTamil) "" else "active"
+                        val tamilStyle = if (state.questionState.cardType == CardType.TAMIL) "active" else ""
+                        val englishStyle = if (state.questionState.cardType == CardType.ENGLISH) "active" else ""
                         styledButton {
                             css {
                                 classes = mutableListOf("btn btn-outline-primary $tamilStyle")
@@ -122,9 +112,8 @@ class App : RComponent<RProps, AppState>() {
                                 onClickFunction = {
                                     setState {
                                         questionState.showAnswer = false
-                                        state.questionState.isTamil = true
-                                        state.questionState.timerState =
-                                            TimerState(isLive = true, total = questionState.letterState.letterKeys.size)
+                                        state.questionState.cardType = CardType.TAMIL
+                                        state.questionState.timerState = TimerState()
                                     }
                                 }
                             }
@@ -139,43 +128,41 @@ class App : RComponent<RProps, AppState>() {
                                 onClickFunction = {
                                     setState {
                                         questionState.showAnswer = false
-                                        state.questionState.isTamil = false
-                                        state.questionState.timerState =
-                                            TimerState(isLive = true, total = questionState.sightWordsState.words.size)
+                                        state.questionState.cardType = CardType.ENGLISH
+                                        state.questionState.timerState = TimerState()
                                     }
                                 }
                             }
                             +"English"
                         }
                     }
-                    if (state.questionState.isTamil) {
+                    if (state.questionState.cardType == CardType.TAMIL) {
                         tamilLettersPage {
                             questionState = state.questionState
                             onShowAnswerClick = { points ->
                                 setState {
                                     questionState.showAnswer = !questionState.showAnswer
-                                    questionState.timerState.points += points
+                                    questionState.tamilState.addPoints(points)
                                 }
                             }
                             onNextClick = {
                                 setState {
                                     questionState.showAnswer = false
-                                    questionState.timerState.count = questionState.letterState.goNext()
+                                    questionState.tamilState.goNext()
                                 }
                             }
                             onPreviousClick = {
                                 setState {
                                     questionState.showAnswer = false
-                                    questionState.letterState.goPrevious()
+                                    questionState.tamilState.goPrevious()
                                 }
                             }
                             onLevelChangeClick = { tamilLevel ->
                                 if (questionState.selectedTamilLevel != tamilLevel) {
                                     setState {
                                         questionState.selectedTamilLevel = tamilLevel
-                                        questionState.letterState = LetterStateTamil(state.questionState.tamilLetters)
-                                        questionState.timerState =
-                                            TimerState(isLive = true, total = questionState.letterState.letterKeys.size)
+                                        questionState.tamilState = TamilState()
+                                        questionState.timerState = TimerState()
                                     }
                                 }
                             }
@@ -187,13 +174,12 @@ class App : RComponent<RProps, AppState>() {
                                 if (questionState.selectedEnglishLevel != englishLevel) {
                                     setState {
                                         questionState.selectedEnglishLevel = englishLevel
-                                        questionState.sightWordsState =
-                                            SightWordsState(questionState.sightWords[englishLevel]!!)
-                                        questionState.timerState =
-                                            TimerState(isLive = true, total = questionState.sightWordsState.words.size)
+                                        questionState.englishState =
+                                            EnglishState(questionState.sightWords[englishLevel]!!)
+                                        questionState.timerState = TimerState()
                                     }
                                     mainScope.launch {
-                                        val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
+                                        val fetchSoundUrls = fetchSoundUrls(questionState.englishState.getQuestion())
                                         setState {
                                             questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
                                         }
@@ -202,10 +188,10 @@ class App : RComponent<RProps, AppState>() {
                             }
                             onBackClick = {
                                 setState {
-                                    questionState.sightWordsState.goPrevious()
+                                    questionState.englishState.goPrevious()
                                 }
                                 mainScope.launch {
-                                    val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
+                                    val fetchSoundUrls = fetchSoundUrls(questionState.englishState.getQuestion())
                                     setState {
                                         questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
                                     }
@@ -213,10 +199,10 @@ class App : RComponent<RProps, AppState>() {
                             }
                             onNextClick = {
                                 setState {
-                                    questionState.timerState.count = questionState.sightWordsState.goNext()
+                                    questionState.englishState.goNext()
                                 }
                                 mainScope.launch {
-                                    val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
+                                    val fetchSoundUrls = fetchSoundUrls(questionState.englishState.getQuestion())
                                     setState {
                                         questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
                                     }
@@ -238,13 +224,12 @@ class App : RComponent<RProps, AppState>() {
                             }
                             onReloadClick = {
                                 setState {
-                                    questionState.sightWordsState =
-                                        SightWordsState(questionState.sightWords[questionState.selectedEnglishLevel]!!)
-                                    questionState.timerState =
-                                        TimerState(isLive = true, total = questionState.sightWordsState.words.size)
+                                    questionState.englishState =
+                                        EnglishState(questionState.sightWords[questionState.selectedEnglishLevel]!!)
+                                    questionState.timerState = TimerState()
                                 }
                                 mainScope.launch {
-                                    val fetchSoundUrls = fetchSoundUrls(questionState.sightWordsState.getCurrent())
+                                    val fetchSoundUrls = fetchSoundUrls(questionState.englishState.getQuestion())
                                     setState {
                                         questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
                                     }
@@ -273,12 +258,25 @@ class App : RComponent<RProps, AppState>() {
                     css {
                         classes = mutableListOf("container-sm p-0")
                     }
-                    val currentTimerState =
-                        if (state.loaded) state.questionState.timerState else TimerState(isLive = false)
-                    val selectedLang = if (state.loaded) state.questionState.isTamil else true
-                    statusPage {
-                        isTamil = selectedLang
-                        timerState = currentTimerState
+                    if (state.loaded) {
+                        val currentTime = state.questionState.timerState.time
+                        val currentPoints =
+                            if (state.questionState.cardType == CardType.TAMIL) {
+                                state.questionState.tamilState.getPoints()
+                            } else {
+                                state.questionState.englishState.getPoints()
+                            }
+                        val currentTotalPoints =
+                            if (state.questionState.cardType == CardType.TAMIL) {
+                                state.questionState.tamilState.attemptedPoints()
+                            } else {
+                                state.questionState.englishState.maxPoints()
+                            }
+                        statusPage {
+                            time = "Time: ${currentTime / 60 % 60} : ${currentTime % 60}"
+                            points = currentPoints
+                            totalPoints = currentTotalPoints
+                        }
                     }
                 }
             }

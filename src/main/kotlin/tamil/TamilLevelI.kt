@@ -31,15 +31,14 @@ external interface TamilLevelIState : RState {
 
 class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilLevelIState>(props) {
     override fun TamilLevelIState.init(props: TamilLevelIProps) {
-        val mei = props.questionState.letterState.getCurrent().mei
-        val uyirMeiLetters = props.questionState.letterState.meiLettersMap[mei]!!
+        val uyirMeiLetters = props.questionState.tamilState.getUyirMeiForUyir()
         checkState = uyirMeiLetters.associateWith { true }.toMutableMap()
         showHelp = false
     }
 
     override fun RBuilder.render() {
-        val letterState = props.questionState.letterState
-        val current = letterState.getCurrent()
+        val tamilState = props.questionState.tamilState
+        val question = tamilState.getQuestion()
         val showAnswer = props.questionState.showAnswer
 
         styledDiv {
@@ -60,7 +59,7 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                             classes = mutableListOf("card-body")
                             fontSize = 40.px
                         }
-                        +current.mei
+                        +question.mei
                     }
                 }
             }
@@ -79,7 +78,7 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                             fontSize = 40.px
                         }
                         if (state.showHelp) {
-                            +letterState.help[current.uyir]!!
+                            +question.help
                         } else {
                             styledImg {
                                 css {
@@ -90,8 +89,10 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                         }
                         attrs {
                             onClickFunction = {
-                                setState {
-                                    showHelp = !showHelp
+                                if (!state.showHelp) {
+                                    setState {
+                                        showHelp = !showHelp
+                                    }
                                 }
                             }
                         }
@@ -112,7 +113,7 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                             classes = mutableListOf("card-body")
                             fontSize = 40.px
                         }
-                        +current.uyir
+                        +question.uyir
                     }
                 }
             }
@@ -124,7 +125,7 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
             for (entry in state.checkState.entries) {
                 styledButton {
                     val style = when {
-                        showAnswer && entry.key == letterState.getAnswer() -> "success"
+                        showAnswer && entry.key == tamilState.getAnswer() -> "success"
                         entry.value -> "primary"
                         else -> "danger"
                     }
@@ -134,7 +135,7 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                     attrs {
                         disabled = if (showAnswer) true else !entry.value
                         onClickFunction = {
-                            if (letterState.getAnswer() == entry.key) {
+                            if (tamilState.getAnswer() == entry.key) {
                                 val failedCount = state.checkState.values.filter { !it }.count()
                                 val points = when {
                                     failedCount >= 3 -> 0
@@ -175,7 +176,7 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                                 props.onNextClick()
                             }
                         }
-                        if (showAnswer) +letterState.getAnswer() else +"?"
+                        if (showAnswer) +tamilState.getAnswer() else +"?"
                     }
                 }
             }

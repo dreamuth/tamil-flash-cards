@@ -1,23 +1,24 @@
 import org.w3c.dom.Audio
-import kotlin.random.Random
 
 external interface SoundResponse {
     val word: String
     val phonetics: Array<Phonetic>
     val meanings: Array<Any>
 }
+
 external interface Phonetic {
     val text: String?
     val audio: String?
 }
+
 data class LetterKey(val uyir: String, val mei: String)
+data class TamilLetter(val uyir: String, val mei: String, val uyirMei: String, val help: String)
 
 data class QuestionState(
-    var isTamil: Boolean,
-    var tamilLetters: Map<LetterKey, String>,
+    var cardType: CardType,
     var sightWords: MutableMap<EnglishLevel, List<String>>,
-    var letterState: LetterStateTamil,
-    var sightWordsState: SightWordsState,
+    var tamilState: TamilState,
+    var englishState: EnglishState,
     var selectedTamilLevel: TamilLevel,
     var selectedEnglishLevel: EnglishLevel,
     var sightWordsAudios: Map<String, Audio>,
@@ -25,19 +26,16 @@ data class QuestionState(
     var showAnswer: Boolean,
 )
 
-data class TimerState(
-    var isLive: Boolean = false,
-    var isPaused: Boolean = false,
-    var time: Long = 0,
-    var total: Int = 0,
-    var points: Int = 0,
-    var count: Int = 0) {
-    fun isCompleted():Boolean {
-        return count == total
-    }
-    fun totalPoints(): Int {
-        return count * 3
-    }
+data class TamilQuestionState(
+    var tamilState: TamilState,
+    var selectedLevel: TamilLevel,
+)
+
+data class TimerState(var isLive: Boolean = true, var isPaused: Boolean = false, var time: Long = 0)
+
+enum class CardType(val displayValue: String) {
+    TAMIL("தமிழ் பயிற்சி"),
+    ENGLISH("English Practice")
 }
 
 enum class TamilLevel(val displayValue: String) {
@@ -63,124 +61,156 @@ enum class EnglishLevel(val displayValue: String, val filename: String) {
         fun fromDisplayValue(displayValue: String): EnglishLevel {
             return values().first { it.displayValue == displayValue }
         }
+
         fun fromFilename(filename: String): EnglishLevel {
             return values().first { it.filename == filename }
         }
     }
 }
 
-val helpLetters = listOf("்","ா","ி","ீ","ு","ூ","ெ","ே","ை","ொ","ோ","ௌ")
-val uyirLetters = listOf("அ","ஆ","இ","ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ")
+val helpLetters = listOf("்", "ா", "ி", "ீ", "ு", "ூ", "ெ", "ே", "ை", "ொ", "ோ", "ௌ")
+val uyirLetters = listOf("அ", "ஆ", "இ", "ஈ", "உ", "ஊ", "எ", "ஏ", "ஐ", "ஒ", "ஓ", "ஔ")
+val meiLetters =
+    listOf("க்", "ங்", "ச்", "ஞ்", "ட்", "ண்", "த்", "ந்", "ப்", "ம்", "ய்", "ர்", "ல்", "வ்", "ழ்", "ள்", "ற்", "ன்")
+val uyirMeiLetters = listOf(
+    "க", "கா", "கி", "கீ", "கு", "கூ", "கெ", "கே", "கை", "கொ", "கோ", "கௌ",
+    "ங", "ஙா", "ஙி", "ஙீ", "ஙு", "ஙூ", "ஙெ", "ஙே", "ஙை", "ஙொ", "ஙோ", "ஙௌ",
+    "ச", "சா", "சி", "சீ", "சு", "சூ", "செ", "சே", "சை", "சொ", "சோ", "சௌ",
+    "ஞ", "ஞா", "ஞி", "ஞீ", "ஞு", "ஞூ", "ஞெ", "ஞே", "ஞை", "ஞொ", "ஞோ", "ஞௌ",
+    "ட", "டா", "டி", "டீ", "டு", "டூ", "டெ", "டே", "டை", "டொ", "டோ", "டௌ",
+    "ண", "ணா", "ணி", "ணீ", "ணு", "ணூ", "ணெ", "ணே", "ணை", "ணொ", "ணோ", "ணௌ",
+    "த", "தா", "தி", "தீ", "து", "தூ", "தெ", "தே", "தை", "தொ", "தோ", "தௌ",
+    "ந", "நா", "நி", "நீ", "நு", "நூ", "நெ", "நே", "நை", "நொ", "நோ", "நௌ",
+    "ப", "பா", "பி", "பீ", "பு", "பூ", "பெ", "பே", "பை", "பொ", "போ", "பௌ",
+    "ம", "மா", "மி", "மீ", "மு", "மூ", "மெ", "மே", "மை", "மொ", "மோ", "மௌ",
+    "ய", "யா", "யி", "யீ", "யு", "யூ", "யெ", "யே", "யை", "யொ", "யோ", "யௌ",
+    "ர", "ரா", "ரி", "ரீ", "ரு", "ரூ", "ரெ", "ரே", "ரை", "ரொ", "ரோ", "ரௌ",
+    "ல", "லா", "லி", "லீ", "லு", "லூ", "லெ", "லே", "லை", "லொ", "லோ", "லௌ",
+    "வ", "வா", "வி", "வீ", "வு", "வூ", "வெ", "வே", "வை", "வொ", "வோ", "வௌ",
+    "ழ", "ழா", "ழி", "ழீ", "ழு", "ழூ", "ழெ", "ழே", "ழை", "ழொ", "ழோ", "ழௌ",
+    "ள", "ளா", "ளி", "ளீ", "ளு", "ளூ", "ளெ", "ளே", "ளை", "ளொ", "ளோ", "ளௌ",
+    "ற", "றா", "றி", "றீ", "று", "றூ", "றெ", "றே", "றை", "றொ", "றோ", "றௌ",
+    "ன", "னா", "னி", "னீ", "னு", "னூ", "னெ", "னே", "னை", "னொ", "னோ", "னௌ"
+)
 val helpLettersMap = uyirLetters.zip(helpLetters).toMap()
+val uyirMeiLettersMap = getUyirMeiLettersMap()
 
-data class LetterStateTamil(
-    override var index: Int,
-    override var tamilLetters: Map<LetterKey, String>,
-    override var history: MutableList<Int>,
-    override var answers: MutableSet<LetterKey>,
-    val letterKeys: List<LetterKey>,
-    val meiLettersMap: Map<String, List<String>>,
-    val help: Map<String, String>
-) : TamilHistoryState {
-    constructor(tamilLetters: Map<LetterKey, String>) : this(
-        nextIndex(0, tamilLetters.size),
-        tamilLetters,
-        mutableListOf(),
-        mutableSetOf(),
-        tamilLetters.keys.toList(),
-        getMeiLettersMap(tamilLetters),
-        helpLettersMap )
-    fun getCurrent(): LetterKey = letterKeys[index]
-    fun goNext(): Int {
-        answers.add(getCurrent())
-        goNext(letterKeys.size)
-        return answers.size
+fun getUyirMeiLettersMap(): Map<LetterKey, String> {
+    var uyirMeiIndex = 0
+    val result = mutableMapOf<LetterKey, String>()
+    for (meiIndex in meiLetters.indices) {
+        for (uyirIndex in uyirLetters.indices) {
+            result[LetterKey(uyirLetters[uyirIndex], meiLetters[meiIndex])] = uyirMeiLetters[uyirMeiIndex++]
+        }
     }
-    fun goPrevious() = goPrevious(letterKeys.size)
-    fun getAnswer(): String = tamilLetters[getCurrent()]!!
+    return result
 }
 
-interface TamilHistoryState {
-    var index: Int
-    var tamilLetters: Map<LetterKey, String>
-    var history: MutableList<Int>
-    var answers: MutableSet<LetterKey>
-    fun goNext(maxIndex: Int) {
-        if (history.isEmpty()) {
-            history = generateRandomList(maxIndex)
-            history.remove(index)
-            history.add(index)
-        }
-        val nextIndex = history.removeFirst()
-        history.add(nextIndex)
-        println("${this::class} Current: $index to New: $nextIndex of Total: $maxIndex")
-        index = nextIndex
-    }
-    fun goPrevious(maxIndex: Int) {
-        if (history.isEmpty()) {
-            history = generateRandomList(maxIndex)
-            history.remove(index)
-            history.add(index)
-        }
-        var nextIndex = history.removeLast()
-        history.add(0, nextIndex)
-        nextIndex = history.last()
-        println("${this::class} Current: $index to New: $nextIndex of Total: $maxIndex")
-        index = nextIndex
-    }
-    fun clearAnswers() = answers.clear()
+fun getTamilLettersList(): List<TamilLetter> {
+    return getUyirMeiLettersMap().map { TamilLetter(it.key.uyir, it.key.mei, it.value, helpLettersMap[it.key.uyir]!!) }
+        .toList()
 }
 
-data class SightWordsState(
+data class TamilState(
     override var index: Int,
-    override var words: List<String>,
-    override var history: MutableList<Int>,
-    override var answers: MutableSet<String>
+    override var history: List<Int>,
+    override var points: MutableMap<String, Int>,
+    override var factor: Int,
+    var tamilLetters: List<TamilLetter>
 ) : HistoryState {
-    constructor(words: List<String>) : this(
-        nextIndex(0, words.size),
-        words,
-        mutableListOf(),
-        mutableSetOf())
-    fun getCurrent(): String = words[index]
-    fun goNext(): Int {
-        answers.add(getCurrent())
-        goNext(words.size)
-        return answers.size
+    constructor() : this(
+        0,
+        generateRandomList(getTamilLettersList().size),
+        mutableMapOf<String, Int>(),
+        3,
+        getTamilLettersList()
+    )
+
+    fun getQuestion(): TamilLetter = tamilLetters[getCurrentIndex()]
+    fun addPoints(currentPoints: Int, override: Boolean = false) {
+        super.addPoints(getAnswer(), currentPoints, override)
     }
-    fun goPrevious() = goPrevious(words.size)
-    fun getAnswer(): String = getCurrent()
+    fun getAnswer(): String = tamilLetters[getCurrentIndex()].uyirMei
+    fun getUyirMeiForUyir(): List<String> {
+        return tamilLetters.filter { it.mei == getQuestion().mei }.map { it.uyirMei }
+    }
+    override fun goNext() {
+        addPoints(getAnswer(), 3)
+        super.goNext()
+    }
+}
+
+data class EnglishState(
+    override var index: Int,
+    override var history: List<Int>,
+    override var points: MutableMap<String, Int>,
+    override var factor: Int,
+    var words: List<String>
+) : HistoryState {
+    constructor(words: List<String>) : this(0, generateRandomList(words.size), mutableMapOf<String, Int>(), 1, words)
+
+    fun getQuestion(): String = words[getCurrentIndex()]
+    private fun getAnswer(): String = words[getCurrentIndex()]
+    override fun goNext() {
+        addPoints(getAnswer())
+        super.goNext()
+    }
 }
 
 interface HistoryState {
     var index: Int
-    var words: List<String>
-    var history: MutableList<Int>
-    var answers: MutableSet<String>
-    fun goNext(maxIndex: Int) {
-        if (history.isEmpty()) {
-            history = generateRandomList(maxIndex)
-            history.remove(index)
-            history.add(index)
-        }
-        val nextIndex = history.removeFirst()
-        history.add(nextIndex)
-        println("${this::class} Current: $index to New: $nextIndex of Total: $maxIndex")
-        index = nextIndex
+    var history: List<Int>
+    var points: MutableMap<String, Int>
+    var factor: Int
+    fun hasNext(): Boolean {
+        return index != (history.size - 1)
     }
-    fun goPrevious(maxIndex: Int) {
-        if (history.isEmpty()) {
-            history = generateRandomList(maxIndex)
-            history.remove(index)
-            history.add(index)
-        }
-        var nextIndex = history.removeLast()
-        history.add(0, nextIndex)
-        nextIndex = history.last()
-        println("${this::class} Current: $index to New: $nextIndex of Total: $maxIndex")
-        index = nextIndex
+
+    fun hasPrevious(): Boolean {
+        return index != 0
     }
-    fun clearAnswers() = answers.clear()
+
+    fun isPlayed(key: String): Boolean {
+        return points.contains(key)
+    }
+
+    fun getCurrentIndex(): Int {
+        return history[index]
+    }
+
+    fun goNext() {
+        if (hasNext()) ++index
+    }
+
+    fun goPrevious() {
+        if (hasPrevious()) --index
+    }
+
+    fun getPoints(): Int {
+        return points.values.sum()
+    }
+
+    fun addPoints(key: String, currentPoints: Int = 1, override: Boolean = false) {
+        if (points.contains(key)) {
+            if (override) {
+                points[key] = currentPoints
+            }
+        } else {
+            points[key] = currentPoints
+        }
+    }
+
+    fun attemptedPoints(): Int {
+        return points.count() * factor
+    }
+
+    fun maxPoints(): Int {
+        return history.size * factor
+    }
+
+    fun isCompleted(): Boolean {
+        return points.size == history.size
+    }
 }
 
 
@@ -189,23 +219,4 @@ fun generateRandomList(maxIndex: Int): MutableList<Int> {
     val randomList = generateSequence { (count--).takeIf { it >= 0 } }.toMutableList()
     randomList.shuffle()
     return randomList
-}
-
-fun nextIndex(currentIndex: Int, maxIndex: Int): Int {
-    var newIndex: Int
-    do {
-        newIndex = Random.nextInt(maxIndex)
-    } while (newIndex == currentIndex && maxIndex != 1)
-    println("Current: $currentIndex to New: $newIndex of Total: $maxIndex")
-    return newIndex
-}
-
-fun getMeiLettersMap(tamilLetters: Map<LetterKey, String>): Map<String, List<String>> {
-    val meiLetters = tamilLetters.keys.map { it.mei }.toSet()
-    val result = mutableMapOf<String, List<String>>()
-    for (meiLetter in meiLetters) {
-        val meiLetterKeys = tamilLetters.keys.filter { it.mei == meiLetter }
-        result[meiLetterKeys[0].mei] = tamilLetters.filter { meiLetterKeys.contains(it.key) }.map { it.value }.toList()
-    }
-    return result
 }

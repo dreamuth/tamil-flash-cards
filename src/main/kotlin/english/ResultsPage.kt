@@ -1,7 +1,7 @@
 package english
 
 import EnglishLevel
-import TimerState
+import QuestionState
 import components.keyValuePair
 import kotlinx.css.fontSize
 import kotlinx.css.height
@@ -18,8 +18,7 @@ import styled.styledDiv
 import styled.styledH2
 
 external interface ResultsPageProps : RProps {
-    var englishLevel: EnglishLevel
-    var timerState: TimerState
+    var questionState: QuestionState
     var onReloadClick: () -> Unit
     var onNextLevelClick: () -> Unit
 }
@@ -34,7 +33,7 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                 css {
                     classes = mutableListOf("col p-1")
                 }
-                val time = props.timerState.time
+                val time = props.questionState.timerState.time
                 val displayValue = "${time / 60 % 60} : ${time % 60}"
                 styledDiv {
                     css {
@@ -58,11 +57,11 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                         }
                         keyValuePair {
                             label = "Level:"
-                            value = props.englishLevel.name.removePrefix("LEVEL_")
+                            value = props.questionState.selectedEnglishLevel.name.removePrefix("LEVEL_")
                         }
                         keyValuePair {
                             label = "Total question:"
-                            value = "${props.timerState.total}"
+                            value = "${props.questionState.englishState.maxPoints()}"
                         }
                         keyValuePair {
                             label = "Duration:"
@@ -93,7 +92,7 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                     }
                     +"Play Again"
                 }
-                if (props.englishLevel != EnglishLevel.LEVEL_VI) {
+                if (props.questionState.selectedEnglishLevel != EnglishLevel.LEVEL_VI) {
                     styledButton {
                         css {
                             classes = mutableListOf("btn btn-success m-1 flex-fill")

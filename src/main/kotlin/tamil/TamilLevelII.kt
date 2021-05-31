@@ -38,7 +38,7 @@ class TamilLevelII : RComponent<TamilLevelIIProps, RState>() {
                     attrs {
                         onClickFunction = { props.onNextClick() }
                     }
-                    +props.questionState.letterState.getAnswer()
+                    +props.questionState.tamilState.getAnswer()
                 }
             }
         }

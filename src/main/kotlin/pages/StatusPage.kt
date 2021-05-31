@@ -1,6 +1,5 @@
 package pages
 
-import TimerState
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -11,8 +10,9 @@ import styled.styledDiv
 import styled.styledH6
 
 external interface StatusPageProps : RProps {
-    var isTamil: Boolean
-    var timerState: TimerState
+    var time: String
+    var points: Int
+    var totalPoints: Int
 }
 
 class StatusPage : RComponent<StatusPageProps, RState>() {
@@ -33,24 +33,19 @@ class StatusPage : RComponent<StatusPageProps, RState>() {
                         css {
                             classes = mutableListOf("col")
                         }
-                        val time = props.timerState.time
-                        val displayValue = "Time: ${time / 60 % 60} : ${time % 60}"
                         styledH6 {
-                            +displayValue
+                            +props.time
                         }
                     }
                     styledDiv {
                         css {
                             classes = mutableListOf("col")
                         }
-                        val points = if (props.isTamil) props.timerState.points else props.timerState.count
-                        val total = if (props.isTamil) props.timerState.totalPoints() else props.timerState.total
-                        val displayValue = "Points: $points/$total"
                         styledH6 {
                             css {
                                 classes = mutableListOf("text-end")
                             }
-                            +displayValue
+                            +"Points: ${props.points}/${props.totalPoints}"
                         }
                     }
                 }

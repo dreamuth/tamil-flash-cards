@@ -24,16 +24,15 @@ class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
             displayValue = props.questionState.selectedEnglishLevel.displayValue
             onLevelChangeClick = props.onLevelChangeClick
         }
-        if (props.questionState.timerState.isCompleted()) {
+        if (props.questionState.englishState.isCompleted()) {
             resultsPage {
-                englishLevel = props.questionState.selectedEnglishLevel
-                timerState = props.questionState.timerState
+                questionState = props.questionState
                 onReloadClick = props.onReloadClick
                 onNextLevelClick = props.onNextLevelClick
             }
         } else {
             question {
-                displayValue = props.questionState.sightWordsState.getCurrent()
+                displayValue = props.questionState.englishState.getQuestion()
                 onNextClick = props.onNextClick
             }
             navAndAudio {

@@ -16,7 +16,7 @@ import styled.css
 import styled.styledButton
 import styled.styledDiv
 
-external interface TamilLettersPageProps: RProps {
+external interface TamilLettersPageProps : RProps {
     var questionState: QuestionState
     var onShowAnswerClick: (Int) -> Unit
     var onPreviousClick: () -> Unit
@@ -35,7 +35,7 @@ class TamilLettersPage : RComponent<TamilLettersPageProps, RState>() {
                 questionState = props.questionState
                 onShowAnswerClick = props.onShowAnswerClick
                 onNextClick = props.onNextClick
-                key = props.questionState.letterState.getAnswer()
+                key = props.questionState.tamilState.getAnswer()
             }
         } else {
             tamilLevelII {
@@ -62,7 +62,7 @@ class TamilLettersPage : RComponent<TamilLettersPageProps, RState>() {
                             height = 60.px
                         }
                         attrs {
-                            disabled = props.questionState.timerState.count == 0
+                            disabled = !props.questionState.tamilState.hasPrevious()
                             onClickFunction = {
                                 props.onPreviousClick()
                             }

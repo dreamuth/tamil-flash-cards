@@ -43,7 +43,7 @@ class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
                             height = 60.px
                         }
                         attrs {
-                            disabled = props.questionState.timerState.count == 0
+                            disabled = !props.questionState.englishState.hasPrevious()
                             onClickFunction = {
                                 props.onBackClick()
                             }
