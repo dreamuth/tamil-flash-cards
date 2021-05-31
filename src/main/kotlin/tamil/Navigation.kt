@@ -1,10 +1,10 @@
-package english
+package tamil
 
 import QuestionState
+import TamilLevel
 import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.px
-import kotlinx.css.width
 import kotlinx.html.js.onClickFunction
 import react.RBuilder
 import react.RComponent
@@ -14,15 +14,14 @@ import react.ReactElement
 import styled.css
 import styled.styledButton
 import styled.styledDiv
-import styled.styledImg
 
-external interface NavAndAudioProps : RProps {
+external interface NavigationProps : RProps {
     var questionState: QuestionState
-    var onBackClick: () -> Unit
+    var onPreviousClick: () -> Unit
     var onNextClick: () -> Unit
 }
 
-class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
+class Navigation : RComponent<NavigationProps, RState>() {
     override fun RBuilder.render() {
         styledDiv {
             css {
@@ -40,12 +39,12 @@ class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
                         css {
                             classes = mutableListOf("btn btn-success m-1 flex-fill")
                             fontSize = 30.px
-                            height = 60.px
+                            height = 80.px
                         }
                         attrs {
-                            disabled = !props.questionState.englishState.hasPrevious()
+                            disabled = !props.questionState.tamilState.hasPrevious()
                             onClickFunction = {
-                                props.onBackClick()
+                                props.onPreviousClick()
                             }
                         }
                         +"Back"
@@ -54,10 +53,14 @@ class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
                         css {
                             classes = mutableListOf("btn btn-success m-1 flex-fill")
                             fontSize = 30.px
-                            height = 60.px
+                            height = 80.px
+                        }
+                        val disabledState = when (props.questionState.selectedTamilLevel) {
+                            TamilLevel.LEVEL_I -> !props.questionState.tamilState.hasNext() || !props.questionState.showAnswer
+                            TamilLevel.LEVEL_II -> !props.questionState.tamilState.hasNext()
                         }
                         attrs {
-                            disabled = props.questionState.englishState.isCompleted()
+                            disabled = disabledState
                             onClickFunction = {
                                 props.onNextClick()
                             }
@@ -70,8 +73,8 @@ class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
     }
 }
 
-fun RBuilder.navAndAudio(handler: NavAndAudioProps.() -> Unit): ReactElement {
-    return child(NavAndAudio::class) {
+fun RBuilder.navigation(handler: NavigationProps.() -> Unit): ReactElement {
+    return child(Navigation::class) {
         this.attrs(handler)
     }
 }

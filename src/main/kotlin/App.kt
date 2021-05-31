@@ -22,7 +22,7 @@ import styled.styledDiv
 import tamil.tamilLettersPage
 
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
-    println("version: 2021-05-31.1")
+    println("version: 2021-05-31.2")
     val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
     val result = mutableMapOf<EnglishLevel, List<String>>()
     for (i in 1..6) {
@@ -45,7 +45,7 @@ class App : RComponent<RProps, AppState>() {
         mainScope.launch {
             val sightWordsSource = fetchSightWords()
             val newEnglishState = EnglishState(sightWordsSource[EnglishLevel.LEVEL_I]!!)
-            val soundUrls = fetchSoundUrls(newEnglishState.getQuestion())
+            val audio = fetchFirstAudio(newEnglishState.getQuestion())
             setState {
                 questionState = QuestionState(
                     cardType = CardType.TAMIL,
@@ -55,7 +55,7 @@ class App : RComponent<RProps, AppState>() {
                     showAnswer = false,
                     englishState = newEnglishState,
                     timerState = TimerState(),
-                    sightWordsAudios = soundUrls.associateWith { Audio(it) },
+                    sightWordsAudio = audio,
                     tamilState = TamilState()
                 )
                 loaded = true
@@ -76,11 +76,11 @@ class App : RComponent<RProps, AppState>() {
         }
     }
 
-    private suspend fun fetchSoundUrls(word: String): List<String> {
+    private suspend fun fetchFirstAudio(word: String): Audio? {
         val sourceUrl = "https://api.dictionaryapi.dev/api/v2/entries/en_US/$word"
         val sourceData = window.fetch(sourceUrl).await().json().await().unsafeCast<Array<SoundResponse>>()
         val values = sourceData.firstOrNull()?.phonetics?.map { it.audio }
-        return values?.filterNotNull() ?: listOf()
+        return values?.filterNotNull()?.map { Audio(it) }?.firstOrNull()
     }
 
     override fun RBuilder.render() {
@@ -179,9 +179,9 @@ class App : RComponent<RProps, AppState>() {
                                         questionState.timerState = TimerState()
                                     }
                                     mainScope.launch {
-                                        val fetchSoundUrls = fetchSoundUrls(questionState.englishState.getQuestion())
+                                        val audio = fetchFirstAudio(questionState.englishState.getQuestion())
                                         setState {
-                                            questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
+                                            questionState.sightWordsAudio = audio
                                         }
                                     }
                                 }
@@ -191,9 +191,9 @@ class App : RComponent<RProps, AppState>() {
                                     questionState.englishState.goPrevious()
                                 }
                                 mainScope.launch {
-                                    val fetchSoundUrls = fetchSoundUrls(questionState.englishState.getQuestion())
+                                    val audio = fetchFirstAudio(questionState.englishState.getQuestion())
                                     setState {
-                                        questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
+                                        questionState.sightWordsAudio = audio
                                     }
                                 }
                             }
@@ -202,23 +202,16 @@ class App : RComponent<RProps, AppState>() {
                                     questionState.englishState.goNext()
                                 }
                                 mainScope.launch {
-                                    val fetchSoundUrls = fetchSoundUrls(questionState.englishState.getQuestion())
+                                    val audio = fetchFirstAudio(questionState.englishState.getQuestion())
                                     setState {
-                                        questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
+                                        questionState.sightWordsAudio = audio
                                     }
                                 }
                             }
-                            onAudioClick = { name ->
-                                state.questionState.sightWordsAudios.forEach {
-                                    if (it.key != name) {
-                                        it.value.pause()
-                                        it.value.currentTime = 0.0
-                                    }
-                                }
-                                val audio = state.questionState.sightWordsAudios[name]
-                                audio?.let {
-                                    if (it.currentTime.equals(0.0) || it.ended) {
-                                        it.play()
+                            onAudioClick = {
+                                state.questionState.sightWordsAudio?.let { audio ->
+                                    if (audio.currentTime.equals(0.0) || audio.ended) {
+                                        audio.play()
                                     }
                                 }
                             }
@@ -229,9 +222,9 @@ class App : RComponent<RProps, AppState>() {
                                     questionState.timerState = TimerState()
                                 }
                                 mainScope.launch {
-                                    val fetchSoundUrls = fetchSoundUrls(questionState.englishState.getQuestion())
+                                    val audio = fetchFirstAudio(questionState.englishState.getQuestion())
                                     setState {
-                                        questionState.sightWordsAudios = fetchSoundUrls.associateWith { Audio(it) }
+                                        questionState.sightWordsAudio = audio
                                     }
                                 }
                             }

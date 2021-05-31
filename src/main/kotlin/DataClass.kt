@@ -21,7 +21,7 @@ data class QuestionState(
     var englishState: EnglishState,
     var selectedTamilLevel: TamilLevel,
     var selectedEnglishLevel: EnglishLevel,
-    var sightWordsAudios: Map<String, Audio>,
+    var sightWordsAudio: Audio?,
     var timerState: TimerState,
     var showAnswer: Boolean,
 )
@@ -116,18 +116,21 @@ data class TamilState(
     override var history: List<Int>,
     override var points: MutableMap<String, Int>,
     override var factor: Int,
-    var tamilLetters: List<TamilLetter>
+    var tamilLetters: List<TamilLetter>,
+    var lastPoints: Int
 ) : HistoryState {
     constructor() : this(
         0,
         generateRandomList(getTamilLettersList().size),
         mutableMapOf<String, Int>(),
         3,
-        getTamilLettersList()
+        getTamilLettersList(),
+        0
     )
 
     fun getQuestion(): TamilLetter = tamilLetters[getCurrentIndex()]
     fun addPoints(currentPoints: Int, override: Boolean = false) {
+        lastPoints = currentPoints
         super.addPoints(getAnswer(), currentPoints, override)
     }
     fun getAnswer(): String = tamilLetters[getCurrentIndex()].uyirMei

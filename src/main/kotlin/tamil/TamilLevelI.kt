@@ -1,11 +1,9 @@
 package tamil
 
 import QuestionState
-import kotlinx.css.fontSize
 import kotlinx.css.height
-import kotlinx.css.pct
+import kotlinx.css.minWidth
 import kotlinx.css.px
-import kotlinx.css.width
 import kotlinx.html.js.onClickFunction
 import react.RBuilder
 import react.RComponent
@@ -16,7 +14,6 @@ import react.setState
 import styled.css
 import styled.styledButton
 import styled.styledDiv
-import styled.styledImg
 
 external interface TamilLevelIProps : RProps {
     var questionState: QuestionState
@@ -26,94 +23,33 @@ external interface TamilLevelIProps : RProps {
 
 external interface TamilLevelIState : RState {
     var checkState: MutableMap<String, Boolean>
-    var showHelp: Boolean
+    var showHint: Boolean
 }
 
 class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilLevelIState>(props) {
     override fun TamilLevelIState.init(props: TamilLevelIProps) {
         val uyirMeiLetters = props.questionState.tamilState.getUyirMeiForUyir()
         checkState = uyirMeiLetters.associateWith { true }.toMutableMap()
-        showHelp = false
+        showHint = false
     }
 
     override fun RBuilder.render() {
         val tamilState = props.questionState.tamilState
-        val question = tamilState.getQuestion()
         val showAnswer = props.questionState.showAnswer
 
-        styledDiv {
-            css {
-                classes = mutableListOf("row m-1 ")
+        if (showAnswer) {
+            levelIAnswer {
+                questionState = props.questionState
             }
-            styledDiv {
-                css {
-                    classes = mutableListOf("col p-1")
-                }
-                styledDiv {
-                    css {
-                        classes = mutableListOf("card bg-warning text-center")
-                        width = 100.pct
-                    }
-                    styledDiv {
-                        css {
-                            classes = mutableListOf("card-body")
-                            fontSize = 40.px
+        } else {
+            levelIQuestion {
+                questionState = props.questionState
+                showHint = state.showHint
+                onHintClick = {
+                    if (!state.showHint) {
+                        setState {
+                            showHint = !showHint
                         }
-                        +question.mei
-                    }
-                }
-            }
-            styledDiv {
-                css {
-                    classes = mutableListOf("col p-1")
-                }
-                styledDiv {
-                    css {
-                        classes = mutableListOf("card bg-warning text-center")
-                        width = 100.pct
-                    }
-                    styledDiv {
-                        css {
-                            classes = mutableListOf("card-body")
-                            fontSize = 40.px
-                        }
-                        if (state.showHelp) {
-                            +question.help
-                        } else {
-                            styledImg {
-                                css {
-                                    width = 50.px
-                                }
-                                attrs.src = "svg/lightbulb.svg"
-                            }
-                        }
-                        attrs {
-                            onClickFunction = {
-                                if (!state.showHelp) {
-                                    setState {
-                                        showHelp = !showHelp
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            styledDiv {
-                css {
-                    classes = mutableListOf("col p-1")
-                }
-                styledDiv {
-                    css {
-                        classes = mutableListOf("card bg-warning text-center")
-                        width = 100.pct
-                    }
-                    styledDiv {
-                        css {
-                            classes = mutableListOf("card-body")
-                            fontSize = 40.px
-                        }
-                        +question.uyir
                     }
                 }
             }
@@ -131,53 +67,30 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                     }
                     css {
                         classes = mutableListOf("btn btn-$style m-2")
+                        height = 50.px
+                        minWidth = 50.px
                     }
                     attrs {
-                        disabled = if (showAnswer) true else !entry.value
                         onClickFunction = {
-                            if (tamilState.getAnswer() == entry.key) {
-                                val failedCount = state.checkState.values.filter { !it }.count()
-                                val points = when {
-                                    failedCount >= 3 -> 0
-                                    state.showHelp && failedCount >= 1 -> 0
-                                    state.showHelp -> 1 - failedCount
-                                    else -> 3 - failedCount
-                                }
-                                props.onShowAnswerClick(points)
-                            } else {
-                                setState {
-                                    checkState[entry.key] = false
+                            if (!showAnswer && entry.value) {
+                                if (tamilState.getAnswer() == entry.key) {
+                                    val failedCount = state.checkState.values.filter { !it }.count()
+                                    val newPoints = when {
+                                        failedCount >= 3 -> 0
+                                        state.showHint && failedCount >= 1 -> 0
+                                        state.showHint -> 1 - failedCount
+                                        else -> 3 - failedCount
+                                    }
+                                    props.onShowAnswerClick(newPoints)
+                                } else {
+                                    setState {
+                                        checkState[entry.key] = false
+                                    }
                                 }
                             }
                         }
                     }
                     +entry.key
-                }
-            }
-        }
-        styledDiv {
-            css {
-                classes = mutableListOf("row m-1")
-            }
-            styledDiv {
-                css {
-                    classes = mutableListOf("col p-1")
-                }
-                styledButton {
-                    css {
-                        classes = mutableListOf("btn btn-success w-100")
-                        fontSize = 80.px
-                        height = 150.px
-                    }
-                    attrs {
-                        disabled = !showAnswer
-                        onClickFunction = {
-                            if (showAnswer) {
-                                props.onNextClick()
-                            }
-                        }
-                        if (showAnswer) +tamilState.getAnswer() else +"?"
-                    }
                 }
             }
         }

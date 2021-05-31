@@ -13,7 +13,7 @@ external interface SightWordsPageProps : RProps {
     var onLevelChangeClick: (EnglishLevel) -> Unit
     var onBackClick: () -> Unit
     var onNextClick: () -> Unit
-    var onAudioClick: (String) -> Unit
+    var onAudioClick: () -> Unit
     var onReloadClick: () -> Unit
     var onNextLevelClick: () -> Unit
 }
@@ -33,12 +33,13 @@ class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
         } else {
             question {
                 displayValue = props.questionState.englishState.getQuestion()
-                onNextClick = props.onNextClick
+                audio = props.questionState.sightWordsAudio
+                onAudioClick = props.onAudioClick
             }
             navAndAudio {
                 questionState = props.questionState
                 onBackClick = props.onBackClick
-                onAudioClick = props.onAudioClick
+                onNextClick = props.onNextClick
             }
         }
     }

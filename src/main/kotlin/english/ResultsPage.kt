@@ -95,7 +95,7 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                 if (props.questionState.selectedEnglishLevel != EnglishLevel.LEVEL_VI) {
                     styledButton {
                         css {
-                            classes = mutableListOf("btn btn-success m-1 flex-fill")
+                            classes = mutableListOf("btn btn-info m-1 flex-fill")
                             fontSize = 30.px
                             height = 60.px
                         }

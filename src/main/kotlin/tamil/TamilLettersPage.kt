@@ -43,34 +43,10 @@ class TamilLettersPage : RComponent<TamilLettersPageProps, RState>() {
                 onNextClick = props.onNextClick
             }
         }
-        styledDiv {
-            css {
-                classes = mutableListOf("row m-0")
-            }
-            styledDiv {
-                css {
-                    classes = mutableListOf("col p-1")
-                }
-                styledDiv {
-                    css {
-                        classes = mutableListOf("d-flex")
-                    }
-                    styledButton {
-                        css {
-                            classes = mutableListOf("btn btn-success m-1 flex-fill")
-                            fontSize = 30.px
-                            height = 60.px
-                        }
-                        attrs {
-                            disabled = !props.questionState.tamilState.hasPrevious()
-                            onClickFunction = {
-                                props.onPreviousClick()
-                            }
-                        }
-                        +"முன்பு"
-                    }
-                }
-            }
+        navigation {
+            questionState = props.questionState
+            onPreviousClick = props.onPreviousClick
+            onNextClick = props.onNextClick
         }
     }
 }

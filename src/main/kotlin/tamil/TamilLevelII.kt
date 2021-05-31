@@ -4,7 +4,6 @@ import QuestionState
 import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.px
-import kotlinx.html.js.onClickFunction
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -31,12 +30,9 @@ class TamilLevelII : RComponent<TamilLevelIIProps, RState>() {
                 }
                 styledButton {
                     css {
-                        classes = mutableListOf("btn btn-success w-100")
+                        classes = mutableListOf("btn btn-warning w-100")
                         fontSize = 80.px
                         height = 250.px
-                    }
-                    attrs {
-                        onClickFunction = { props.onNextClick() }
                     }
                     +props.questionState.tamilState.getAnswer()
                 }
