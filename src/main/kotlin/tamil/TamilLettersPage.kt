@@ -2,19 +2,12 @@ package tamil
 
 import QuestionState
 import TamilLevel
-import kotlinx.css.fontSize
-import kotlinx.css.height
-import kotlinx.css.px
-import kotlinx.html.js.onClickFunction
 import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
 import react.ReactElement
 import react.key
-import styled.css
-import styled.styledButton
-import styled.styledDiv
 
 external interface TamilLettersPageProps : RProps {
     var questionState: QuestionState
@@ -22,6 +15,8 @@ external interface TamilLettersPageProps : RProps {
     var onPreviousClick: () -> Unit
     var onNextClick: () -> Unit
     var onLevelChangeClick: (TamilLevel) -> Unit
+    var onReloadClick: () -> Unit
+    var onNextLevelClick: () -> Unit
 }
 
 class TamilLettersPage : RComponent<TamilLettersPageProps, RState>() {
@@ -30,23 +25,31 @@ class TamilLettersPage : RComponent<TamilLettersPageProps, RState>() {
             displayValue = props.questionState.selectedTamilLevel.displayValue
             onLevelChangeClick = props.onLevelChangeClick
         }
-        if (props.questionState.selectedTamilLevel == TamilLevel.LEVEL_I) {
-            tamilLevelI {
+        if (props.questionState.timerState.time == 0L) {
+            resultsPage {
                 questionState = props.questionState
-                onShowAnswerClick = props.onShowAnswerClick
-                onNextClick = props.onNextClick
-                key = props.questionState.tamilState.getAnswer()
+                onReloadClick = props.onReloadClick
+                onNextLevelClick = props.onNextLevelClick
             }
         } else {
-            tamilLevelII {
+            if (props.questionState.selectedTamilLevel == TamilLevel.LEVEL_I) {
+                tamilLevelI {
+                    questionState = props.questionState
+                    onShowAnswerClick = props.onShowAnswerClick
+                    onNextClick = props.onNextClick
+                    key = props.questionState.tamilState.getAnswer()
+                }
+            } else {
+                tamilLevelII {
+                    questionState = props.questionState
+                    onNextClick = props.onNextClick
+                }
+            }
+            navigation {
                 questionState = props.questionState
+                onPreviousClick = props.onPreviousClick
                 onNextClick = props.onNextClick
             }
-        }
-        navigation {
-            questionState = props.questionState
-            onPreviousClick = props.onPreviousClick
-            onNextClick = props.onNextClick
         }
     }
 }

@@ -1,3 +1,4 @@
+import components.buttonGroup
 import english.sightWordsPage
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
@@ -5,9 +6,6 @@ import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.css.Color
 import kotlinx.css.backgroundColor
-import kotlinx.css.fontSize
-import kotlinx.css.px
-import kotlinx.html.js.onClickFunction
 import org.w3c.dom.Audio
 import pages.headerPage
 import pages.statusPage
@@ -17,8 +15,8 @@ import react.RProps
 import react.RState
 import react.setState
 import styled.css
-import styled.styledButton
 import styled.styledDiv
+import tamil.playtime
 import tamil.tamilLettersPage
 
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
@@ -56,7 +54,8 @@ class App : RComponent<RProps, AppState>() {
                     englishState = newEnglishState,
                     timerState = TimerState(),
                     sightWordsAudio = audio,
-                    tamilState = TamilState()
+                    tamilState = TamilState(),
+                    selectedTimerValue = TimerValues.MINS_10,
                 )
                 loaded = true
                 window.setInterval(timerHandler(), 1000)
@@ -65,13 +64,17 @@ class App : RComponent<RProps, AppState>() {
     }
 
     private fun timerHandler(): () -> Unit = {
-        if (state.questionState.timerState.isLive
-            && !state.questionState.timerState.isPaused
-            && ((state.questionState.cardType == CardType.TAMIL && !state.questionState.tamilState.isCompleted())
-                || (state.questionState.cardType == CardType.ENGLISH && !state.questionState.englishState.isCompleted()))
-        ) {
-            setState {
-                questionState.timerState.time++
+        if (state.questionState.timerState.isLive) {
+            if (state.questionState.cardType == CardType.ENGLISH && !state.questionState.englishState.isCompleted()) {
+                setState {
+                    questionState.timerState.time++
+                }
+            } else if (state.questionState.cardType == CardType.TAMIL && !state.questionState.tamilState.isCompleted()) {
+                if (state.questionState.timerState.time > 0) {
+                    setState {
+                        questionState.timerState.time--
+                    }
+                }
             }
         }
     }
@@ -97,72 +100,75 @@ class App : RComponent<RProps, AppState>() {
                     classes = mutableListOf("container-fluid m-0 p-0 justify-content-center")
                 }
                 if (state.loaded) {
-                    styledDiv {
-                        css {
-                            classes = mutableListOf("btn-group p-2 w-100")
-                        }
-                        val tamilStyle = if (state.questionState.cardType == CardType.TAMIL) "active" else ""
-                        val englishStyle = if (state.questionState.cardType == CardType.ENGLISH) "active" else ""
-                        styledButton {
-                            css {
-                                classes = mutableListOf("btn btn-outline-primary $tamilStyle")
-                                fontSize = 20.px
+                    buttonGroup {
+                        selected = state.questionState.cardType.title
+                        allValues = CardType.values().map { it.title }.toList()
+                        onButtonClick = {
+                            val selectedCard = CardType.fromTitle(it)
+                            setState {
+                                questionState.showAnswer = false
+                                state.questionState.cardType = selectedCard
+                                state.questionState.timerState = TimerState(isLive = selectedCard == CardType.ENGLISH)
                             }
-                            attrs {
-                                onClickFunction = {
-                                    setState {
-                                        questionState.showAnswer = false
-                                        state.questionState.cardType = CardType.TAMIL
-                                        state.questionState.timerState = TimerState()
-                                    }
-                                }
-                            }
-                            +"தமிழ்"
-                        }
-                        styledButton {
-                            css {
-                                classes = mutableListOf("btn btn-outline-primary $englishStyle")
-                                fontSize = 20.px
-                            }
-                            attrs {
-                                onClickFunction = {
-                                    setState {
-                                        questionState.showAnswer = false
-                                        state.questionState.cardType = CardType.ENGLISH
-                                        state.questionState.timerState = TimerState()
-                                    }
-                                }
-                            }
-                            +"English"
                         }
                     }
                     if (state.questionState.cardType == CardType.TAMIL) {
-                        tamilLettersPage {
-                            questionState = state.questionState
-                            onShowAnswerClick = { points ->
-                                setState {
-                                    questionState.showAnswer = !questionState.showAnswer
-                                    questionState.tamilState.addPoints(points)
-                                }
-                            }
-                            onNextClick = {
-                                setState {
-                                    questionState.showAnswer = false
-                                    questionState.tamilState.goNext()
-                                }
-                            }
-                            onPreviousClick = {
-                                setState {
-                                    questionState.showAnswer = false
-                                    questionState.tamilState.goPrevious()
-                                }
-                            }
-                            onLevelChangeClick = { tamilLevel ->
-                                if (questionState.selectedTamilLevel != tamilLevel) {
+                        if (state.questionState.timerState.isLive) {
+                            tamilLettersPage {
+                                questionState = state.questionState
+                                onShowAnswerClick = { points ->
                                     setState {
-                                        questionState.selectedTamilLevel = tamilLevel
+                                        questionState.showAnswer = !questionState.showAnswer
+                                        questionState.tamilState.addPoints(points)
+                                    }
+                                }
+                                onNextClick = {
+                                    setState {
+                                        questionState.showAnswer = false
+                                        questionState.tamilState.goNext()
+                                    }
+                                }
+                                onPreviousClick = {
+                                    setState {
+                                        questionState.showAnswer = false
+                                        questionState.tamilState.goPrevious()
+                                    }
+                                }
+                                onLevelChangeClick = { tamilLevel ->
+                                    if (questionState.selectedTamilLevel != tamilLevel) {
+                                        setState {
+                                            questionState.selectedTamilLevel = tamilLevel
+                                            questionState.tamilState = TamilState()
+                                            questionState.timerState = TimerState()
+                                        }
+                                    }
+                                }
+                                onReloadClick = {
+                                    setState {
                                         questionState.tamilState = TamilState()
                                         questionState.timerState = TimerState()
+                                    }
+                                }
+                                onNextLevelClick = {
+                                    val nextLevel = when (state.questionState.selectedTamilLevel) {
+                                        TamilLevel.LEVEL_I -> TamilLevel.LEVEL_II
+                                        TamilLevel.LEVEL_II -> TamilLevel.LEVEL_II
+                                    }
+                                    onLevelChangeClick(nextLevel)
+                                }
+                            }
+                        } else {
+                            playtime {
+                                questionState = state.questionState
+                                onSelectedTimerValueChange = {
+                                    setState {
+                                        questionState.selectedTimerValue = it
+                                    }
+                                }
+                                onStart = {
+                                    setState {
+                                        questionState.timerState =
+                                            TimerState(isLive = true, time = questionState.selectedTimerValue.value)
                                     }
                                 }
                             }
@@ -176,7 +182,7 @@ class App : RComponent<RProps, AppState>() {
                                         questionState.selectedEnglishLevel = englishLevel
                                         questionState.englishState =
                                             EnglishState(questionState.sightWords[englishLevel]!!)
-                                        questionState.timerState = TimerState()
+                                        questionState.timerState = TimerState(isLive = true)
                                     }
                                     mainScope.launch {
                                         val audio = fetchFirstAudio(questionState.englishState.getQuestion())
@@ -219,7 +225,7 @@ class App : RComponent<RProps, AppState>() {
                                 setState {
                                     questionState.englishState =
                                         EnglishState(questionState.sightWords[questionState.selectedEnglishLevel]!!)
-                                    questionState.timerState = TimerState()
+                                    questionState.timerState = TimerState(isLive = true)
                                 }
                                 mainScope.launch {
                                     val audio = fetchFirstAudio(questionState.englishState.getQuestion())
@@ -261,9 +267,9 @@ class App : RComponent<RProps, AppState>() {
                             }
                         val currentTotalPoints =
                             if (state.questionState.cardType == CardType.TAMIL) {
-                                state.questionState.tamilState.attemptedPoints()
+                                state.questionState.tamilState.getAttemptedPoints()
                             } else {
-                                state.questionState.englishState.maxPoints()
+                                state.questionState.englishState.getMaxPoints()
                             }
                         statusPage {
                             time = "Time: ${currentTime / 60 % 60} : ${currentTime % 60}"

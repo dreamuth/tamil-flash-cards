@@ -1,7 +1,7 @@
-package english
+package tamil
 
-import EnglishLevel
 import QuestionState
+import TamilLevel
 import components.keyValuePair
 import kotlinx.css.fontSize
 import kotlinx.css.height
@@ -33,7 +33,7 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                 css {
                     classes = mutableListOf("col p-1")
                 }
-                val time = props.questionState.timerState.time
+                val time = props.questionState.selectedTimerValue.value
                 val displayValue = "${time / 60 % 60} : ${time % 60}"
                 styledDiv {
                     css {
@@ -57,11 +57,12 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                         }
                         keyValuePair {
                             label = "Level:"
-                            value = props.questionState.selectedEnglishLevel.name.removePrefix("LEVEL_")
+                            value = props.questionState.selectedTamilLevel.displayValue
                         }
                         keyValuePair {
-                            label = "Total question:"
-                            value = "${props.questionState.englishState.getMaxPoints()}"
+                            label = "Points:"
+                            value =
+                                "${props.questionState.tamilState.getPoints()} / ${props.questionState.tamilState.getAttemptedPoints()}"
                         }
                         keyValuePair {
                             label = "Duration:"
@@ -92,7 +93,7 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                     }
                     +"Play Again"
                 }
-                if (props.questionState.selectedEnglishLevel != EnglishLevel.LEVEL_VI) {
+                if (props.questionState.selectedTamilLevel != TamilLevel.LEVEL_II) {
                     styledButton {
                         css {
                             classes = mutableListOf("btn btn-info m-1 flex-fill")

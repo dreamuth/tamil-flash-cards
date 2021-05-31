@@ -23,6 +23,7 @@ data class QuestionState(
     var selectedEnglishLevel: EnglishLevel,
     var sightWordsAudio: Audio?,
     var timerState: TimerState,
+    var selectedTimerValue: TimerValues,
     var showAnswer: Boolean,
 )
 
@@ -31,11 +32,29 @@ data class TamilQuestionState(
     var selectedLevel: TamilLevel,
 )
 
-data class TimerState(var isLive: Boolean = true, var isPaused: Boolean = false, var time: Long = 0)
+data class TimerState(var isLive: Boolean = false, var time: Long = 0)
 
-enum class CardType(val displayValue: String) {
-    TAMIL("தமிழ் பயிற்சி"),
-    ENGLISH("English Practice")
+enum class TimerValues(val value: Long, val displayValue: String) {
+    MINS_5(300, "5 Mins"),
+    MINS_10(600, "10 Mins"),
+    MINS_15(900, "15 Mins");
+
+    companion object {
+        fun fromDisplayValue(displayValue: String): TimerValues {
+            return values().first { it.displayValue == displayValue }
+        }
+    }
+}
+
+enum class CardType(val displayValue: String, val title: String) {
+    TAMIL("தமிழ் பயிற்சி", "தமிழ்"),
+    ENGLISH("English Practice", "English");
+
+    companion object {
+        fun fromTitle(title: String): CardType {
+            return values().first { it.title == title }
+        }
+    }
 }
 
 enum class TamilLevel(val displayValue: String) {
@@ -203,11 +222,11 @@ interface HistoryState {
         }
     }
 
-    fun attemptedPoints(): Int {
+    fun getAttemptedPoints(): Int {
         return points.count() * factor
     }
 
-    fun maxPoints(): Int {
+    fun getMaxPoints(): Int {
         return history.size * factor
     }
 
