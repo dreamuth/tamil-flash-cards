@@ -92,7 +92,7 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                     }
                     +"Play Again"
                 }
-                if (props.questionState.selectedEnglishLevel != EnglishLevel.LEVEL_VI) {
+                if (props.questionState.selectedEnglishLevel != EnglishLevel.LEVEL_VIII) {
                     styledButton {
                         css {
                             classes = mutableListOf("btn btn-info m-1 flex-fill")

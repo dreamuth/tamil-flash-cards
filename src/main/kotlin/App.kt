@@ -20,10 +20,10 @@ import tamil.playtime
 import tamil.tamilLettersPage
 
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
-    println("version: 2021-06-01.2")
+    println("version: 2021-06-02.1")
     val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
     val result = mutableMapOf<EnglishLevel, List<String>>()
-    for (i in 1..6) {
+    for (i in 1..8) {
         val sourceUrl = "$prefix/private/english-sight-words/level$i.txt"
         val sourceData = window.fetch(sourceUrl).await().text().await()
         result[EnglishLevel.fromFilename("level$i")] = sourceData.lines().filter { it.isNotBlank() }
@@ -250,7 +250,9 @@ class App : RComponent<RProps, AppState>() {
                                     EnglishLevel.LEVEL_III -> EnglishLevel.LEVEL_IV
                                     EnglishLevel.LEVEL_IV -> EnglishLevel.LEVEL_V
                                     EnglishLevel.LEVEL_V -> EnglishLevel.LEVEL_VI
-                                    EnglishLevel.LEVEL_VI -> EnglishLevel.LEVEL_VI
+                                    EnglishLevel.LEVEL_VI -> EnglishLevel.LEVEL_VII
+                                    EnglishLevel.LEVEL_VII -> EnglishLevel.LEVEL_VIII
+                                    EnglishLevel.LEVEL_VIII -> EnglishLevel.LEVEL_VIII
                                 }
                                 onLevelChangeClick(nextLevel)
                             }

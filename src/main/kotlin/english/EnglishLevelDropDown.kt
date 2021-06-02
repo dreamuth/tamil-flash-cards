@@ -32,6 +32,8 @@ class EnglishLevelDropDown : RComponent<EnglishLevelDropDownProps, RState>() {
                         EnglishLevel.LEVEL_IV.displayValue,
                         EnglishLevel.LEVEL_V.displayValue,
                         EnglishLevel.LEVEL_VI.displayValue,
+                        EnglishLevel.LEVEL_VII.displayValue,
+                        EnglishLevel.LEVEL_VIII.displayValue,
                     )
                 )
                 selectedName = props.displayValue

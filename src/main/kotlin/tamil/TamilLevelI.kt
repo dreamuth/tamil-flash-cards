@@ -1,6 +1,7 @@
 package tamil
 
 import QuestionState
+import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.minWidth
 import kotlinx.css.px
@@ -66,7 +67,8 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                         else -> "danger"
                     }
                     css {
-                        classes = mutableListOf("btn btn-$style m-2")
+                        classes = mutableListOf("btn btn-$style m-2 p-0")
+                        fontSize = 20.px
                         height = 80.px
                         minWidth = 80.px
                     }

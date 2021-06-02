@@ -75,7 +75,9 @@ enum class EnglishLevel(val displayValue: String, val filename: String) {
     LEVEL_III("Level III", "level3"),
     LEVEL_IV("Level IV", "level4"),
     LEVEL_V("Level V", "level5"),
-    LEVEL_VI("Level VI", "level6");
+    LEVEL_VI("Level VI", "level6"),
+    LEVEL_VII("Level VII", "level7"),
+    LEVEL_VIII("Level VIII", "level8");
 
     companion object {
         fun fromDisplayValue(displayValue: String): EnglishLevel {
