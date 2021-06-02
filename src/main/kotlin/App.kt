@@ -20,7 +20,7 @@ import tamil.playtime
 import tamil.tamilLettersPage
 
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
-    println("version: 2021-06-01.1")
+    println("version: 2021-06-01.2")
     val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
     val result = mutableMapOf<EnglishLevel, List<String>>()
     for (i in 1..6) {
@@ -29,6 +29,14 @@ suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
         result[EnglishLevel.fromFilename("level$i")] = sourceData.lines().filter { it.isNotBlank() }
     }
     return result
+}
+
+suspend fun fetchSoundUrls(): Map<String, String> {
+    val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
+    val sourceUrl = "$prefix/private/english-sight-words/sounds.csv"
+    val sourceData = window.fetch(sourceUrl).await().text().await()
+    return sourceData.lines().filter { it.isNotBlank() }
+        .associate { val pair = it.split(","); pair[0] to pair[1] }
 }
 
 external interface AppState : RState {
@@ -43,7 +51,9 @@ class App : RComponent<RProps, AppState>() {
         mainScope.launch {
             val sightWordsSource = fetchSightWords()
             val newEnglishState = EnglishState(sightWordsSource[EnglishLevel.LEVEL_I]!!)
-            val audio = fetchFirstAudio(newEnglishState.getQuestion())
+            val soundUrls = fetchSoundUrls()
+            val url = soundUrls[newEnglishState.getQuestion()]
+            val audio = if (url != null) Audio(url) else null
             setState {
                 questionState = QuestionState(
                     cardType = CardType.TAMIL,
@@ -54,6 +64,7 @@ class App : RComponent<RProps, AppState>() {
                     englishState = newEnglishState,
                     timerState = TimerState(),
                     sightWordsAudio = audio,
+                    sounds = soundUrls,
                     tamilState = TamilState(),
                     selectedTimerValue = TimerValues.MINS_10,
                 )
@@ -79,11 +90,9 @@ class App : RComponent<RProps, AppState>() {
         }
     }
 
-    private suspend fun fetchFirstAudio(word: String): Audio? {
-        val sourceUrl = "https://api.dictionaryapi.dev/api/v2/entries/en_US/$word"
-        val sourceData = window.fetch(sourceUrl).await().json().await().unsafeCast<Array<SoundResponse>>()
-        val values = sourceData.firstOrNull()?.phonetics?.map { it.audio }
-        return values?.filterNotNull()?.map { Audio(it) }?.firstOrNull()
+    private fun fetchFirstAudio(word: String): Audio? {
+        val url = state.questionState.sounds[word]
+        return if (url != null) Audio(url) else null
     }
 
     override fun RBuilder.render() {

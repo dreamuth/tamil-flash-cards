@@ -22,6 +22,7 @@ data class QuestionState(
     var selectedTamilLevel: TamilLevel,
     var selectedEnglishLevel: EnglishLevel,
     var sightWordsAudio: Audio?,
+    var sounds: Map<String, String>,
     var timerState: TimerState,
     var selectedTimerValue: TimerValues,
     var showAnswer: Boolean,
