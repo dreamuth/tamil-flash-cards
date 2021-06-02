@@ -20,7 +20,7 @@ import tamil.playtime
 import tamil.tamilLettersPage
 
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
-    println("version: 2021-05-31.2")
+    println("version: 2021-06-01.1")
     val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
     val result = mutableMapOf<EnglishLevel, List<String>>()
     for (i in 1..6) {

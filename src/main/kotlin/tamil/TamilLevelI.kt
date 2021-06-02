@@ -67,8 +67,8 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
                     }
                     css {
                         classes = mutableListOf("btn btn-$style m-2")
-                        height = 50.px
-                        minWidth = 50.px
+                        height = 80.px
+                        minWidth = 80.px
                     }
                     attrs {
                         onClickFunction = {
