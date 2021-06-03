@@ -1,4 +1,4 @@
-package tamil
+package tamil.identify
 
 import QuestionState
 import kotlinx.css.fontSize
@@ -16,20 +16,19 @@ import styled.css
 import styled.styledButton
 import styled.styledDiv
 
-external interface TamilLevelIProps : RProps {
+external interface TamilLevel2Props : RProps {
     var questionState: QuestionState
     var onShowAnswerClick: (Int) -> Unit
-    var onNextClick: () -> Unit
 }
 
-external interface TamilLevelIState : RState {
+external interface TamilLevel2State : RState {
     var checkState: MutableMap<String, Boolean>
     var showHint: Boolean
 }
 
-class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilLevelIState>(props) {
-    override fun TamilLevelIState.init(props: TamilLevelIProps) {
-        val uyirMeiLetters = props.questionState.tamilState.getUyirMeiForUyir()
+class TamilLevel2(props: TamilLevel2Props) : RComponent<TamilLevel2Props, TamilLevel2State>(props) {
+    override fun TamilLevel2State.init(props: TamilLevel2Props) {
+        val uyirMeiLetters = props.questionState.tamilState.getUyirMeiForUyir().shuffled()
         checkState = uyirMeiLetters.associateWith { true }.toMutableMap()
         showHint = false
     }
@@ -39,11 +38,11 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
         val showAnswer = props.questionState.showAnswer
 
         if (showAnswer) {
-            levelIAnswer {
+            tamilAnswer {
                 questionState = props.questionState
             }
         } else {
-            levelIQuestion {
+            tamilQuestion {
                 questionState = props.questionState
                 showHint = state.showHint
                 onHintClick = {
@@ -99,8 +98,8 @@ class TamilLevelI(props: TamilLevelIProps) : RComponent<TamilLevelIProps, TamilL
     }
 }
 
-fun RBuilder.tamilLevelI(handler: TamilLevelIProps.() -> Unit): ReactElement {
-    return child(TamilLevelI::class) {
+fun RBuilder.tamilLevel2(handler: TamilLevel2Props.() -> Unit): ReactElement {
+    return child(TamilLevel2::class) {
         this.attrs(handler)
     }
 }
