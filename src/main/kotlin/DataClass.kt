@@ -59,8 +59,9 @@ enum class CardType(val displayValue: String, val title: String) {
 }
 
 enum class TamilLevel(val displayValue: String) {
-    LEVEL_I("நிலை I"),
-    LEVEL_II("நிலை II");
+    LEVEL_I("நிலை 1"),
+    LEVEL_II("நிலை 2"),
+    LEVEL_III("நிலை 3");
 
     companion object {
         fun fromDisplayValue(displayValue: String): TamilLevel {

@@ -18,6 +18,7 @@ import styled.css
 import styled.styledDiv
 import tamil.playtime
 import tamil.tamilLettersPage
+import tamil.tamilLevelDropDown
 
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
     println("version: 2021-06-02.1")
@@ -161,12 +162,25 @@ class App : RComponent<RProps, AppState>() {
                                 onNextLevelClick = {
                                     val nextLevel = when (state.questionState.selectedTamilLevel) {
                                         TamilLevel.LEVEL_I -> TamilLevel.LEVEL_II
-                                        TamilLevel.LEVEL_II -> TamilLevel.LEVEL_II
+                                        TamilLevel.LEVEL_II -> TamilLevel.LEVEL_III
+                                        TamilLevel.LEVEL_III -> TamilLevel.LEVEL_III
                                     }
                                     onLevelChangeClick(nextLevel)
                                 }
                             }
                         } else {
+                            tamilLevelDropDown {
+                                displayValue = state.questionState.selectedTamilLevel.displayValue
+                                onLevelChangeClick = { tamilLevel ->
+                                    if (state.questionState.selectedTamilLevel != tamilLevel) {
+                                        setState {
+                                            questionState.selectedTamilLevel = tamilLevel
+                                            questionState.tamilState = TamilState()
+                                            questionState.timerState = TimerState()
+                                        }
+                                    }
+                                }
+                            }
                             playtime {
                                 questionState = state.questionState
                                 onSelectedTimerValueChange = {

@@ -24,7 +24,13 @@ class TamilLevelDropDown : RComponent<TamilLevelDropDownProps, RState>() {
             }
             dropdown {
                 id = "TamilLevel"
-                names = listOf(listOf(TamilLevel.LEVEL_I.displayValue, TamilLevel.LEVEL_II.displayValue))
+                names = listOf(
+                    listOf(
+                        TamilLevel.LEVEL_I.displayValue,
+                        TamilLevel.LEVEL_II.displayValue,
+                        TamilLevel.LEVEL_III.displayValue
+                    )
+                )
                 selectedName = props.displayValue
                 onDropdownClick = { _, name ->
                     setState {

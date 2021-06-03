@@ -57,7 +57,8 @@ class Navigation : RComponent<NavigationProps, RState>() {
                         }
                         val disabledState = when (props.questionState.selectedTamilLevel) {
                             TamilLevel.LEVEL_I -> !props.questionState.tamilState.hasNext() || !props.questionState.showAnswer
-                            TamilLevel.LEVEL_II -> !props.questionState.tamilState.hasNext()
+                            TamilLevel.LEVEL_II -> !props.questionState.tamilState.hasNext() || !props.questionState.showAnswer
+                            TamilLevel.LEVEL_III -> !props.questionState.tamilState.hasNext()
                         }
                         attrs {
                             disabled = disabledState

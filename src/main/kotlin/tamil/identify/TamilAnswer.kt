@@ -1,4 +1,4 @@
-package tamil
+package tamil.identify
 
 import QuestionState
 import kotlinx.css.fontSize
@@ -14,11 +14,11 @@ import react.ReactElement
 import styled.css
 import styled.styledDiv
 
-external interface LevelIAnswerProps : RProps {
+external interface TamilAnswerProps : RProps {
     var questionState: QuestionState
 }
 
-class LevelIAnswer : RComponent<LevelIAnswerProps, RState>() {
+class TamilAnswer : RComponent<TamilAnswerProps, RState>() {
     override fun RBuilder.render() {
         val question = props.questionState.tamilState.getQuestion()
 
@@ -59,8 +59,8 @@ class LevelIAnswer : RComponent<LevelIAnswerProps, RState>() {
     }
 }
 
-fun RBuilder.levelIAnswer(handler: LevelIAnswerProps.() -> Unit): ReactElement {
-    return child(LevelIAnswer::class) {
+fun RBuilder.tamilAnswer(handler: TamilAnswerProps.() -> Unit): ReactElement {
+    return child(TamilAnswer::class) {
         this.attrs(handler)
     }
 }

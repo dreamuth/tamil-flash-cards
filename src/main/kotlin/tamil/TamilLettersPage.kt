@@ -8,6 +8,9 @@ import react.RProps
 import react.RState
 import react.ReactElement
 import react.key
+import tamil.identify.tamilLevel1
+import tamil.identify.tamilLevel2
+import tamil.sound.tamilLevel3
 
 external interface TamilLettersPageProps : RProps {
     var questionState: QuestionState
@@ -32,17 +35,26 @@ class TamilLettersPage : RComponent<TamilLettersPageProps, RState>() {
                 onNextLevelClick = props.onNextLevelClick
             }
         } else {
-            if (props.questionState.selectedTamilLevel == TamilLevel.LEVEL_I) {
-                tamilLevelI {
-                    questionState = props.questionState
-                    onShowAnswerClick = props.onShowAnswerClick
-                    onNextClick = props.onNextClick
-                    key = props.questionState.tamilState.getAnswer()
+            when (props.questionState.selectedTamilLevel) {
+                TamilLevel.LEVEL_I -> {
+                    tamilLevel1 {
+                        questionState = props.questionState
+                        onShowAnswerClick = props.onShowAnswerClick
+                        key = props.questionState.tamilState.getAnswer()
+                    }
                 }
-            } else {
-                tamilLevelII {
-                    questionState = props.questionState
-                    onNextClick = props.onNextClick
+                TamilLevel.LEVEL_II -> {
+                    tamilLevel2 {
+                        questionState = props.questionState
+                        onShowAnswerClick = props.onShowAnswerClick
+                        key = props.questionState.tamilState.getAnswer()
+                    }
+                }
+                TamilLevel.LEVEL_III -> {
+                    tamilLevel3 {
+                        questionState = props.questionState
+                        onNextClick = props.onNextClick
+                    }
                 }
             }
             navigation {

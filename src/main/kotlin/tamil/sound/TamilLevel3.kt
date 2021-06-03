@@ -1,4 +1,4 @@
-package tamil
+package tamil.sound
 
 import QuestionState
 import kotlinx.css.fontSize
@@ -13,12 +13,12 @@ import styled.css
 import styled.styledButton
 import styled.styledDiv
 
-external interface TamilLevelIIProps : RProps {
+external interface TamilLevel3Props : RProps {
     var questionState: QuestionState
     var onNextClick: () -> Unit
 }
 
-class TamilLevelII : RComponent<TamilLevelIIProps, RState>() {
+class TamilLevel3 : RComponent<TamilLevel3Props, RState>() {
     override fun RBuilder.render() {
         styledDiv {
             css {
@@ -41,8 +41,8 @@ class TamilLevelII : RComponent<TamilLevelIIProps, RState>() {
     }
 }
 
-fun RBuilder.tamilLevelII(handler: TamilLevelIIProps.() -> Unit): ReactElement {
-    return child(TamilLevelII::class) {
+fun RBuilder.tamilLevel3(handler: TamilLevel3Props.() -> Unit): ReactElement {
+    return child(TamilLevel3::class) {
         this.attrs(handler)
     }
 }
