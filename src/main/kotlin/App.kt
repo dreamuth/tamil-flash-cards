@@ -150,6 +150,7 @@ class App : RComponent<RProps, AppState>() {
                                             questionState.selectedTamilLevel = tamilLevel
                                             questionState.tamilState = TamilState()
                                             questionState.timerState = TimerState()
+                                            questionState.showAnswer = false
                                         }
                                     }
                                 }
@@ -177,6 +178,7 @@ class App : RComponent<RProps, AppState>() {
                                             questionState.selectedTamilLevel = tamilLevel
                                             questionState.tamilState = TamilState()
                                             questionState.timerState = TimerState()
+                                            questionState.showAnswer = false
                                         }
                                     }
                                 }
