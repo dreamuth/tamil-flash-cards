@@ -60,8 +60,10 @@ class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
                         attrs {
                             disabled = props.questionState.englishState.isCompleted()
                             onClickFunction = {
-                                props.audio?.let {
-                                    props.onAudioClick()
+                                if (props.questionState.playAudioOnNext) {
+                                    props.audio?.let {
+                                        props.onAudioClick()
+                                    }
                                 }
                                 props.onNextClick()
                             }
