@@ -22,7 +22,7 @@ class ButtonGroup : RComponent<ButtonGroupProps, RState>() {
     override fun RBuilder.render() {
         styledDiv {
             css {
-                classes = mutableListOf("btn-group p-2 w-100")
+                classes = mutableListOf("btn-group p-2 flex-fill")
             }
             for (buttonName in props.allValues) {
                 val isActive = if (props.selected == buttonName) "active" else ""

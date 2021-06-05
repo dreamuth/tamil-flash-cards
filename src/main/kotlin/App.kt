@@ -6,7 +6,17 @@ import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.css.Color
 import kotlinx.css.backgroundColor
+import kotlinx.css.fontSize
+import kotlinx.css.height
+import kotlinx.css.px
+import kotlinx.css.width
+import kotlinx.html.ButtonType
+import kotlinx.html.InputType
+import kotlinx.html.id
+import kotlinx.html.js.onChangeFunction
+import kotlinx.html.tabIndex
 import org.w3c.dom.Audio
+import org.w3c.dom.HTMLInputElement
 import pages.headerPage
 import pages.statusPage
 import react.RBuilder
@@ -15,13 +25,18 @@ import react.RProps
 import react.RState
 import react.setState
 import styled.css
+import styled.styledButton
 import styled.styledDiv
+import styled.styledH5
+import styled.styledImg
+import styled.styledInput
+import styled.styledLabel
 import tamil.playtime
 import tamil.tamilLettersPage
 import tamil.tamilLevelDropDown
 
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
-    println("version: 2021-06-02.1")
+    println("version: 2021-06-04.1")
     val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
     val result = mutableMapOf<EnglishLevel, List<String>>()
     for (i in 1..8) {
@@ -58,6 +73,8 @@ class App : RComponent<RProps, AppState>() {
             setState {
                 questionState = QuestionState(
                     cardType = CardType.TAMIL,
+                    showTimer = false,
+                    playAudioOnNext = true,
                     sightWords = sightWordsSource,
                     selectedTamilLevel = TamilLevel.LEVEL_I,
                     selectedEnglishLevel = EnglishLevel.LEVEL_I,
@@ -110,15 +127,141 @@ class App : RComponent<RProps, AppState>() {
                     classes = mutableListOf("container-fluid m-0 p-0 justify-content-center")
                 }
                 if (state.loaded) {
-                    buttonGroup {
-                        selected = state.questionState.cardType.title
-                        allValues = CardType.values().map { it.title }.toList()
-                        onButtonClick = {
-                            val selectedCard = CardType.fromTitle(it)
-                            setState {
-                                questionState.showAnswer = false
-                                state.questionState.cardType = selectedCard
-                                state.questionState.timerState = TimerState(isLive = selectedCard == CardType.ENGLISH)
+                    styledDiv {
+                        css {
+                            classes = mutableListOf("d-flex")
+                        }
+                        buttonGroup {
+                            selected = state.questionState.cardType.title
+                            allValues = CardType.values().map { it.title }.toList()
+                            onButtonClick = {
+                                val selectedCard = CardType.fromTitle(it)
+                                setState {
+                                    questionState.showAnswer = false
+                                    state.questionState.cardType = selectedCard
+                                    state.questionState.timerState =
+                                        TimerState(isLive = selectedCard == CardType.ENGLISH)
+                                }
+                            }
+                        }
+                        styledDiv {
+                            css {
+                                classes = mutableListOf("p-2")
+                            }
+                            styledButton {
+                                css {
+                                    classes = mutableListOf("btn btn-outline-primary")
+                                    fontSize = 20.px
+                                }
+                                styledImg {
+                                    css {
+                                        width = 30.px
+                                        height = 30.px
+                                    }
+                                    attrs.src = "svg/settings.svg"
+                                }
+                                attrs {
+                                    type = ButtonType.button
+                                    attributes["data-bs-toggle"] = "offcanvas"
+                                    attributes["data-bs-target"] = "#settingsMenu"
+                                }
+                            }
+                            styledDiv {
+                                css {
+                                    classes = mutableListOf("offcanvas offcanvas-start")
+                                }
+                                attrs {
+                                    id = "settingsMenu"
+                                    tabIndex = "-1"
+                                }
+                                styledDiv {
+                                    css {
+                                        classes = mutableListOf("offcanvas-header")
+                                    }
+                                    styledH5 {
+                                        css {
+                                            classes = mutableListOf("offcanvas-title")
+                                        }
+                                        attrs {
+                                            id = "settingsMenuLabel"
+                                        }
+                                        +"Settings"
+                                    }
+                                    styledButton {
+                                        css {
+                                            classes = mutableListOf("btn-close text-reset")
+                                        }
+                                        attrs {
+                                            type = ButtonType.button
+                                            attributes["data-bs-dismiss"] = "offcanvas"
+                                        }
+                                    }
+                                }
+                                styledDiv {
+                                    css {
+                                        classes = mutableListOf("offcanvas-body")
+                                    }
+                                    styledDiv {
+                                        css {
+                                            classes = mutableListOf("form-check form-switch")
+                                        }
+                                        styledInput {
+                                            css {
+                                                classes = mutableListOf("form-check-input")
+                                            }
+                                            attrs {
+                                                checked = state.questionState.showTimer
+                                                type = InputType.checkBox
+                                                id = "flexSwitchTimer"
+                                                onChangeFunction = { event ->
+                                                    val target = event.target as HTMLInputElement
+                                                    setState {
+                                                        questionState.showTimer = target.checked
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        styledLabel {
+                                            css {
+                                                classes = mutableListOf("form-check-label")
+                                            }
+                                            attrs {
+                                                htmlFor = "flexSwitchTimer"
+                                            }
+                                            +"Enable Timer"
+                                        }
+                                    }
+                                    styledDiv {
+                                        css {
+                                            classes = mutableListOf("form-check form-switch")
+                                        }
+                                        styledInput {
+                                            css {
+                                                classes = mutableListOf("form-check-input")
+                                            }
+                                            attrs {
+                                                checked = state.questionState.playAudioOnNext
+                                                type = InputType.checkBox
+                                                id = "flexSwitchPlayAudioOnNext"
+                                                onChangeFunction = { event ->
+                                                    val target = event.target as HTMLInputElement
+                                                    setState {
+                                                        questionState.playAudioOnNext = target.checked
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        styledLabel {
+                                            css {
+                                                classes = mutableListOf("form-check-label")
+                                            }
+                                            attrs {
+                                                htmlFor = "flexSwitchPlayAudioOnNext"
+                                            }
+                                            +"Play audio on next button click"
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -299,6 +442,7 @@ class App : RComponent<RProps, AppState>() {
                                 state.questionState.englishState.getMaxPoints()
                             }
                         statusPage {
+                            showTime = state.questionState.showTimer
                             time = "Time: ${currentTime / 60 % 60} : ${currentTime % 60}"
                             points = currentPoints
                             totalPoints = currentTotalPoints

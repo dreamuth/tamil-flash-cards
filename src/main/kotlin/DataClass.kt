@@ -16,6 +16,8 @@ data class TamilLetter(val uyir: String, val mei: String, val uyirMei: String, v
 
 data class QuestionState(
     var cardType: CardType,
+    var showTimer: Boolean,
+    var playAudioOnNext: Boolean,
     var sightWords: MutableMap<EnglishLevel, List<String>>,
     var tamilState: TamilState,
     var englishState: EnglishState,

@@ -40,6 +40,8 @@ class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
                 questionState = props.questionState
                 onBackClick = props.onBackClick
                 onNextClick = props.onNextClick
+                audio = props.questionState.sightWordsAudio
+                onAudioClick = props.onAudioClick
             }
         }
     }

@@ -4,8 +4,8 @@ import QuestionState
 import kotlinx.css.fontSize
 import kotlinx.css.height
 import kotlinx.css.px
-import kotlinx.css.width
 import kotlinx.html.js.onClickFunction
+import org.w3c.dom.Audio
 import react.RBuilder
 import react.RComponent
 import react.RProps
@@ -14,12 +14,13 @@ import react.ReactElement
 import styled.css
 import styled.styledButton
 import styled.styledDiv
-import styled.styledImg
 
 external interface NavAndAudioProps : RProps {
     var questionState: QuestionState
     var onBackClick: () -> Unit
     var onNextClick: () -> Unit
+    var audio: Audio?
+    var onAudioClick: () -> Unit
 }
 
 class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
@@ -59,6 +60,9 @@ class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
                         attrs {
                             disabled = props.questionState.englishState.isCompleted()
                             onClickFunction = {
+                                props.audio?.let {
+                                    props.onAudioClick()
+                                }
                                 props.onNextClick()
                             }
                         }

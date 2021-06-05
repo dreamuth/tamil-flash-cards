@@ -10,6 +10,7 @@ import styled.styledDiv
 import styled.styledH6
 
 external interface StatusPageProps : RProps {
+    var showTime: Boolean
     var time: String
     var points: Int
     var totalPoints: Int
@@ -34,7 +35,8 @@ class StatusPage : RComponent<StatusPageProps, RState>() {
                             classes = mutableListOf("col")
                         }
                         styledH6 {
-                            +props.time
+                            val displayValue = if (props.showTime) props.time else ""
+                            +displayValue
                         }
                     }
                     styledDiv {
