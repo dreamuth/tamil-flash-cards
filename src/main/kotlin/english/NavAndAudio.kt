@@ -20,7 +20,7 @@ external interface NavAndAudioProps : RProps {
     var onBackClick: () -> Unit
     var onNextClick: () -> Unit
     var audio: Audio?
-    var onAudioClick: () -> Unit
+    var onNextAudioClick: () -> Unit
 }
 
 class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
@@ -61,11 +61,12 @@ class NavAndAudio : RComponent<NavAndAudioProps, RState>() {
                             disabled = props.questionState.englishState.isCompleted()
                             onClickFunction = {
                                 if (props.questionState.playAudioOnNext) {
-                                    props.audio?.let {
-                                        props.onAudioClick()
+                                    if (props.audio != null) {
+                                        props.onNextAudioClick()
+                                    } else {
+                                        props.onNextClick()
                                     }
                                 }
-                                props.onNextClick()
                             }
                         }
                         +"Next"

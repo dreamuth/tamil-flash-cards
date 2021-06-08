@@ -36,7 +36,7 @@ import tamil.tamilLettersPage
 import tamil.tamilLevelDropDown
 
 suspend fun fetchSightWords(): MutableMap<EnglishLevel, List<String>> {
-    println("version: 2021-06-07.1")
+    println("version: 2021-06-07.2")
     val prefix = if (window.location.toString().contains("dreamuth.github.io/")) "/tamil-flash-cards" else ""
     val result = mutableMapOf<EnglishLevel, List<String>>()
     for (i in 1..8) {
@@ -386,6 +386,18 @@ class App : RComponent<RProps, AppState>() {
                                 state.questionState.sightWordsAudio?.let { audio ->
                                     if (audio.currentTime.equals(0.0) || audio.ended) {
                                         audio.play()
+                                    }
+                                }
+                            }
+                            onNextAudioClick = {
+                                state.questionState.sightWordsAudio?.let { audio ->
+                                    if (audio.currentTime.equals(0.0) || audio.ended) {
+                                        audio.onended = {
+                                            onNextClick()
+                                        }
+                                        audio.play()
+                                    } else {
+                                        onNextClick()
                                     }
                                 }
                             }

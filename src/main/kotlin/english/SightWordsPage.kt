@@ -14,6 +14,7 @@ external interface SightWordsPageProps : RProps {
     var onBackClick: () -> Unit
     var onNextClick: () -> Unit
     var onAudioClick: () -> Unit
+    var onNextAudioClick: () -> Unit
     var onReloadClick: () -> Unit
     var onNextLevelClick: () -> Unit
 }
@@ -41,7 +42,7 @@ class SightWordsPage : RComponent<SightWordsPageProps, RState>() {
                 onBackClick = props.onBackClick
                 onNextClick = props.onNextClick
                 audio = props.questionState.sightWordsAudio
-                onAudioClick = props.onAudioClick
+                onNextAudioClick = props.onNextAudioClick
             }
         }
     }
