@@ -63,9 +63,11 @@ class ResultsPage : RComponent<ResultsPageProps, RState>() {
                             label = "Total question:"
                             value = "${props.questionState.englishState.getMaxPoints()}"
                         }
-                        keyValuePair {
-                            label = "Duration:"
-                            value = displayValue
+                        if (props.questionState.showTimer) {
+                            keyValuePair {
+                                label = "Duration:"
+                                value = displayValue
+                            }
                         }
                     }
                 }
